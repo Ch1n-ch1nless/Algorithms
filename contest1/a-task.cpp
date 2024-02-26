@@ -3,6 +3,8 @@
 #include <assert.h>
 #include <stdlib.h>
 
+#define FALSE 0
+
 /*===Structs_&_Constants===*/
 
 typedef struct Stack
@@ -23,6 +25,8 @@ const char* const   EXIT_CMD   = "exit";
 
 /*===Function_Declaration===*/
 
+void 	ReadCommands(Stack* const stack);
+
 void    StackCtor(Stack* const stack);
 void    StackDtor(Stack* const stack);
 
@@ -35,47 +39,66 @@ void    StackClear(Stack* const stack);
 
 int main()
 {
-    char contest_command[6] = {};
-
-    int  number = 0;    //number, which will be pushed
-
     Stack my_stack = {};    // <-+
     StackCtor(&my_stack);   // <-+- Create the stack.
 
-    scanf("%s", contest_command); //Read the first command
-
-    while (strcmp(contest_command, EXIT_CMD) != 0)
-    {
-        if (strcmp(contest_command, PUSH_CMD) == 0)
-        {
-            scanf("%d", &number);
-            StackPush(&my_stack, number);
-        }
-        else if (strcmp(contest_command, POP_CMD) == 0)
-        {
-            StackPop(&my_stack);
-        }
-        else if (strcmp(contest_command, BACK_CMD) == 0)
-        {
-            StackTop(&my_stack);
-        }
-        else if (strcmp(contest_command, SIZE_CMD) == 0)
-        {
-            printf("%d\n", my_stack.size);  //Print size of stack
-        }
-        else if (strcmp(contest_command, CLEAR_CMD) == 0)
-        {
-            StackClear(&my_stack);
-        }
-
-        scanf("%s", contest_command);   //Read next command
-    }
+    ReadCommands(&my_stack);
 
     StackDtor(&my_stack);
 
     printf("bye\n");
 
     return 0;
+}
+
+void ReadCommands(Stack* const stack)
+{
+    assert(stack);
+    
+    char contest_command[6] = {}; //Char array, in which the command is stored
+    int  number = 0;    	  //number, which will be pushed
+    
+    //Read the first command
+    if (scanf("%6s", contest_command) == 0)
+    {
+	assert(FALSE && "Program can not read the string!");
+    }
+    
+
+    while (strcmp(contest_command, EXIT_CMD) != 0)
+    {
+        if (strcmp(contest_command, PUSH_CMD) == 0)
+        {
+            //Read the number
+            if (scanf("%d", &number) == 0)
+            {
+              	assert(FALSE && "Program can not read the number");
+            }
+            StackPush(stack, number);
+        }
+        else if (strcmp(contest_command, POP_CMD) == 0)
+        {
+            StackPop(stack);
+        }
+        else if (strcmp(contest_command, BACK_CMD) == 0)
+        {
+            StackTop(stack);
+        }
+        else if (strcmp(contest_command, SIZE_CMD) == 0)
+        {
+            printf("%ld\n", stack->size);  //Print size of stack
+        }
+        else if (strcmp(contest_command, CLEAR_CMD) == 0)
+        {
+            StackClear(stack);
+        }
+
+        //Read next command
+        if (scanf("%6s", contest_command) == 0)
+    	{
+	    assert(FALSE && "Program can not read the string!");
+    	}
+    }
 }
 
 void StackCtor(Stack* const stack)
@@ -90,7 +113,7 @@ void StackCtor(Stack* const stack)
 
 void StackDtor(Stack* const stack)
 {
-    assert(stack);
+    assert((stack != NULL) && "Pointer to stack is NULL!!!\n");
 
     free(stack->data);
 
@@ -102,7 +125,7 @@ void StackDtor(Stack* const stack)
 
 void StackPush(Stack* const stack, const int number)
 {
-    assert(stack);
+    assert((stack != NULL) && "Pointer to stack is NULL!!!\n");
 
     stack->data[stack->size] = number;
 
@@ -113,7 +136,7 @@ void StackPush(Stack* const stack, const int number)
 
 void StackPop(Stack* const stack)
 {
-    assert(stack);
+    assert((stack != NULL) && "Pointer to stack is NULL!!!\n");
 
     if (stack->size == 0)
     {
@@ -128,7 +151,7 @@ void StackPop(Stack* const stack)
 
 void StackTop(Stack* const stack)
 {
-    assert(stack);
+    assert((stack != NULL) && "Pointer to stack is NULL!!!\n");
 
     if (stack->size == 0)
     {
@@ -142,7 +165,7 @@ void StackTop(Stack* const stack)
 
 void StackClear(Stack* const stack)
 {
-    assert(stack);
+    assert((stack != NULL) && "Pointer to stack is NULL!!!\n");
 
     memset(stack->data, 0, stack->size);
     stack->size = 0;
