@@ -17,7 +17,7 @@ void    QuickSort(elem_t* const array, int begin, int end);
 void    HoarePartition(elem_t* const array, int begin, int end, elem_t pivot, int* const new_begin, int* const new_end);
 elem_t  GetPivot(const elem_t* const array, int begin, int end);
 void    SwapValues(elem_t* const ptr1, elem_t* const ptr2);
-void    ReadArrayElements(elem_t* const array);
+void    ReadArrayElements(elem_t* const array, int array_size);
 
 /*===Function_Definition===*/
 
@@ -38,7 +38,7 @@ int main()
         assert(FALSE && "Program can not allocate memory for array:(\n");
     }
 
-    ReadArrayElements(array);
+    ReadArrayElements(array, array_size);
 
     //Sort all elements
     QuickSort(array, 0, array_size - 1);
@@ -52,7 +52,7 @@ int main()
     return 0;
 }
 
-void ReadArrayElements(elem_t* const array)
+void ReadArrayElements(elem_t* const array, int array_size)
 {    
     assert((array != NULL) && "Pointer to \'array\' is NULL!!!\n");
     
@@ -114,7 +114,7 @@ void HoarePartition(elem_t* const array, const int begin, const int end, const e
     }
 }
 
-elem_t  GetPivot(const elem_t* const array, const int begin, const int end)
+elem_t GetPivot(const elem_t* const array, const int begin, const int end)
 {
     assert((array != NULL)  && "Pointer to \"array\" is NULL!!!\n");
     assert((begin >= 0)     && "Function has incorrect value of \"begin\"!!!\n");
