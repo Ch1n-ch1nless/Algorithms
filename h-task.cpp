@@ -13,10 +13,11 @@ const int FALSE = 0;
 
 /*===Function_Declaration===*/
 
-void    QuickSort(elem_t* const array, const int begin, const int end);
-void    MyPartition(elem_t* const array, const int begin, const int end, const elem_t pivot, int* const new_begin, int* const new_end);
-elem_t  GetPivot(const elem_t* const array, const int begin, const int end);
+void    QuickSort(elem_t* const array, int begin, int end);
+void    HoarePartition(elem_t* const array, int begin, int end, elem_t pivot, int* const new_begin, int* const new_end);
+elem_t  GetPivot(const elem_t* const array, int begin, int end);
 void    SwapValues(elem_t* const ptr1, elem_t* const ptr2);
+void    ReadArrayElements(elem_t* const array);
 
 /*===Function_Definition===*/
 
@@ -37,14 +38,7 @@ int main()
         assert(FALSE && "Program can not allocate memory for array:(\n");
     }
 
-    //Read elements in array
-    for (int i = 0; i < array_size; i++)
-    {
-        if (scanf(elem_format, array + i) == 0)
-        {
-            assert(FALSE && "Program can not read the number:(\n");
-        }   
-    }
+    ReadArrayElements(array);
 
     //Sort all elements
     QuickSort(array, 0, array_size - 1);
@@ -58,6 +52,19 @@ int main()
     return 0;
 }
 
+void ReadArrayElements(elem_t* const array)
+{    
+    assert((array != NULL) && "Pointer to \'array\' is NULL!!!\n");
+    
+    for (int i = 0; i < array_size; i++)
+    {
+        if (scanf(elem_format, array + i) == 0)
+        {
+            assert(FALSE && "Program can not read the number:(\n");
+        }   
+    }
+}
+
 void QuickSort(elem_t* const array, const int begin, const int end)
 {
     assert((array != NULL)  && "Pointer to \"array\" is NULL!!!\n");
@@ -69,7 +76,7 @@ void QuickSort(elem_t* const array, const int begin, const int end)
     int new_begin = 0;
     int new_end   = 0;
 
-    MyPartition(array, begin, end, pivot, &new_begin, &new_end);
+    HoarePartition(array, begin, end, pivot, &new_begin, &new_end);
 
     if (new_end > begin)
     {
@@ -82,7 +89,7 @@ void QuickSort(elem_t* const array, const int begin, const int end)
     }
 }
 
-void MyPartition(elem_t* const array, const int begin, const int end, const elem_t pivot, int* const new_begin, int* const new_end)
+void HoarePartition(elem_t* const array, const int begin, const int end, const elem_t pivot, int* const new_begin, int* const new_end)
 {
     assert((array != NULL)  && "Pointer to \"array\" is NULL!!!\n");
     assert((begin >= 0)     && "Function has incorrect value of \"begin\"!!!\n");
@@ -113,7 +120,7 @@ elem_t  GetPivot(const elem_t* const array, const int begin, const int end)
     assert((begin >= 0)     && "Function has incorrect value of \"begin\"!!!\n");
     assert((end >= begin)   && "Function has incorrect value of \"end\"!!\n");
 
-    int mid_index = begin + (end - begin) / 2;
+    int mid_index = begin + rand() % (end - begin);
 
     return array[mid_index];
 }
