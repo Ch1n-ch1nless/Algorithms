@@ -53,6 +53,8 @@ int  GetMax(MinMaxHeap* const heap, int* const buffer);
 
 int main()
 {
+    
+
     return 0;
 }
 
@@ -340,20 +342,97 @@ int MinMaxHeapInsert(MinMaxHeap* const heap, int new_elem)
 
 int ExtractMin(MinMaxHeap* const heap, int* const buffer)
 {
-    
+    assert((heap != NULL) && "Pointer to \'heap\' is NULL!!!\n");
+    assert((heap->data != NULL) && "Pointer to \'heap->data\' is NULL!!!\n");
+
+    if (heap->size == 0)
+    {   
+        return ERROR;
+    }
+
+    heap->size--;
+    *buffer = heap->data[0];
+    heap->data[0] = heap->data[heap->size];
+    SiftDown(heap, 0);
+
+    return OK;
 }
 
 int ExtractMax(MinMaxHeap* const heap, int* const buffer)
 {
+    assert((heap != NULL) && "Pointer to \'heap\' is NULL!!!\n");
+    assert((heap->data != NULL) && "Pointer to \'heap->data\' is NULL!!!\n");
 
+    if (heap->size == 0)
+    {   
+        return ERROR;
+    }
+    else if (heap->size == 1)
+    {
+        heap->size--;
+        *buffer = heap->data[0];
+        return OK;
+    }
+    else if (heap->size == 2)
+    {
+        heap->size--;
+        *buffer = heap->size[1];
+        return OK;
+    }
+
+    heap->size--;
+
+    if (heap->data[1] > heap->data[2])
+    {
+        *buffer = heap->size[1];
+        heap->data[1] = heap->data[heap->size];
+        SiftDown(heap, 1);
+    }
+    else
+    {
+        *buffer = heap->size[2];
+        heap->data[2] = heap->data[heap->size];
+        SiftDown(heap, 2);
+    }
+
+    return OK;
 }
 
 int GetMin(MinMaxHeap* const heap, int* const buffer)
 {
+    assert((heap != NULL) && "Pointer to \'heap\' is NULL!!!\n");
+    assert((heap->data != NULL) && "Pointer to \'heap->data\' is NULL!!!\n");
 
+    if (heap->size == 0)
+    {   
+        return ERROR;
+    }
+
+    *buffer = heap->data[0];
+
+    return OK;
 }
 
 int GetMax(MinMaxHeap* const heap, int* const buffer)
 {
+    assert((heap != NULL) && "Pointer to \'heap\' is NULL!!!\n");
+    assert((heap->data != NULL) && "Pointer to \'heap->data\' is NULL!!!\n");
 
+    if (heap->size == 0)
+    {   
+        return ERROR;
+    }
+    else if (heap->size == 1)
+    {
+        *buffer = heap->data[0];
+        return OK;
+    }
+    else if (heap->size == 2)
+    {
+        *buffer = heap->data[1];
+        return OK;
+    }
+
+    *buffer = (heap->data[1] < heap->data[2]) ? heap->data[2] : heap->data[1];
+    return OK;
 }
