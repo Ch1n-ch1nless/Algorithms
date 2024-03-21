@@ -11,6 +11,11 @@ typedef struct MinMaxHeap
     int  size;
 } MinMaxHeap;
 
+const int INCORRECT_VALUE = -1;
+
+const int TRUE  = 1;
+const int FALSE = 0;
+
 const int ERROR = 0;
 const int OK    = 1;
 
@@ -21,26 +26,28 @@ const int START_CAPACITY = 2 * 1e5;
 
 /*===Function_Declaration===*/
 
-int Swap(int* const ptr1, int* const ptr2);
+void Swap(int* const ptr1, int* const ptr2);
 
-int IsLevel(int index);
-int GetHeapParent(int index);
-int GetLevelParent(int index);
-int GetLeftChild(int index);
-int GetRightChild(int index);
+int  IsLevel(int index);
+int  GetHeapParent(int index);
+int  GetLevelParent(int index);
+int  GetMinHeapChild(int index, const MinMaxHeap* const heap);
+int  GetMaxHeapChild(int index, const MinMaxHeap* const heap);
+int  GetMinLevelChild(int index, const MinMaxHeap* const heap);
+int  GetMaxLevelChild(int index, const MinMaxHeap* const heap);
 
-int MinMaxHeapCtor(MinMaxHeap* const heap, const int start_capacity);
-int MinMaxHeapDtor(MinMaxHeap* const heap);
+int  MinMaxHeapCtor(MinMaxHeap* const heap, const int start_capacity);
+int  MinMaxHeapDtor(MinMaxHeap* const heap);
 
-int SiftUp(MinMaxHeap* const heap, int index);
-int SiftDown(MinMaxHeap* const heap, int index);
+int  SiftUp(MinMaxHeap* const heap, int index);
+int  SiftDown(MinMaxHeap* const heap, int index);
 
-int MinMaxHeapInsert(MinMaxHeap* const heap, int new_elem);
+int  MinMaxHeapInsert(MinMaxHeap* const heap, int new_elem);
 
-int ExtractMin(MinMaxHeap* const heap, int* const buffer);
-int ExtractMax(MinMaxHeap* const heap, int* const buffer);
-int GetMin(MinMaxHeap* const heap, int* const buffer);
-int GetMax(MinMaxHeap* const heap, int* const buffer);
+int  ExtractMin(MinMaxHeap* const heap, int* const buffer);
+int  ExtractMax(MinMaxHeap* const heap, int* const buffer);
+int  GetMin(MinMaxHeap* const heap, int* const buffer);
+int  GetMax(MinMaxHeap* const heap, int* const buffer);
 
 /*===Function_Definition===*/
 
@@ -49,11 +56,13 @@ int main()
     return 0;
 }
 
-/*=====Secondary_functions=====*/
+/*==========Secondary_functions==========*/
 
-int Swap(int* const ptr1, int* const ptr2)
+void Swap(int* const ptr1, int* const ptr2)
 {
-
+    int temp = *ptr1;
+    *ptr1 = *ptr2;
+    *ptr2 = temp;
 }
 
 int IsLevel(int index)
@@ -90,17 +99,91 @@ int GetLevelParent(int index)
     return GetHeapParent(GetHeapParent(index));
 }
 
-int GetLeftChild(int index)
+int GetMinHeapChild(int index, const MinMaxHeap* const heap)
 {
-    return index * 2 + 1;
+    assert((heap != NULL) && "Pointer to \'heap\' is NULL!!!\n");
+    assert((heap->data != NULL) && "Pointer to \'heap->data\' is NULL!!!\n");
+
+    int left_child  = index * 2 + 1;
+    int right_child = index * 2 + 2;
+
+    if (left_child >= heap->size)
+    {
+        return INCORRECT_VALUE;
+    }
+
+    if (right_child >= heap->size)
+    {
+        return left_child;
+    }
+
+    return (heap->data[left_child] < heap->data[right_child]) ? left_child : right_child;
 }
 
-int GetRightChild(int index)
+int GetMaxHeapChild(int index, const MinMaxHeap* const heap)
 {
-    return index * 2 + 2;
+    assert((heap != NULL) && "Pointer to \'heap\' is NULL!!!\n");
+    assert((heap->data != NULL) && "Pointer to \'heap->data\' is NULL!!!\n");
+
+    int left_child  = index * 2 + 1;
+    int right_child = index * 2 + 2;
+
+    if (left_child >= heap->size)
+    {
+        return INCORRECT_VALUE;
+    }
+
+    if (right_child >= heap->size)
+    {
+        return left_child;
+    }
+
+    return (heap->data[left_child] > heap->data[right_child]) ? left_child : right_child;
 }
 
-/*=============================*/
+int GetMinLevelChild(int index, const MinMaxHeap* const heap)
+{
+    assert((heap != NULL) && "Pointer to \'heap\' is NULL!!!\n");
+    assert((heap->data != NULL) && "Pointer to \'heap->data\' is NULL!!!\n");
+
+    int left_child  = GetMinChild(index * 2 + 1);
+    int right_child = GetMinChild(index * 2 + 2);
+
+    if (left_child == INCORRECT_VALUE)
+    {
+        return INCORRECT_VALUE;
+    }
+
+    if (right_child == INCORRECT_VALUE)
+    {
+        return left_child;
+    }
+
+    return (heap->data[left_child] < heap->data[right_child]) ? left_child : right_child;
+}
+
+int GetMaxLevelChild(int index, const MinMaxHeap* const heap)
+{
+    assert((heap != NULL) && "Pointer to \'heap\' is NULL!!!\n");
+    assert((heap->data != NULL) && "Pointer to \'heap->data\' is NULL!!!\n");
+
+    int left_child  = GetMinChild(index * 2 + 1);
+    int right_child = GetMinChild(index * 2 + 2);
+
+    if (left_child == INCORRECT_VALUE)
+    {
+        return INCORRECT_VALUE;
+    }
+
+    if (right_child == INCORRECT_VALUE)
+    {
+        return left_child;
+    }
+
+    return (heap->data[left_child] > heap->data[right_child]) ? left_child : right_child;
+}
+
+/*=======================================*/
 
 int MinMaxHeapCtor(MinMaxHeap* const heap, const int start_capacity)
 {
@@ -129,6 +212,9 @@ int MinMaxHeapDtor(MinMaxHeap* const heap)
 
 int SiftUp(MinMaxHeap* const heap, int index)
 {
+    assert((heap != NULL) && "Pointer to heap is NULL!!!\n");
+    assert((-1 < index && index < heap->size) && "Incorrect value of index!\n");
+
     int cur_parent   = 0;
     int level_parent = 0;
     int is_index_changed = 0;
@@ -183,17 +269,78 @@ int SiftUp(MinMaxHeap* const heap, int index)
 
 int SiftDown(MinMaxHeap* const heap, int index)
 {
-    
+    assert((heap != NULL) && "Pointer to heap is NULL!!!\n");
+    assert((-1 < index && index < heap->size) && "Incorrect value of index!\n");
+
+    int heap_child       = 0;
+    int level_child      = 0;
+    int is_index_changed = 0;
+
+    while (index * 2 + 1 < heap->size)
+    {
+        if (IsLevel(index) == MIN_LEVEL)
+        {
+            heap_child  = GetMinHeapChild(index, heap);
+            level_child = GetMinLevelChild(index, heap);
+
+            if ((heap_child != -1) && (heap->data[index] > heap->data[heap_child]))
+            {
+                Swap(heap->data + index, heap->data + heap_child);
+                index = heap_child;
+                is_index_changed = 1;
+            }
+
+            if ((level_child != -1) && (heap->data[index] > heap->data[level_child]))
+            {
+                Swap(heap->data + index, heap->data + level_child);
+                index = level_child;
+                is_index_changed = 1;
+            }
+        }
+        else
+        {
+            heap_child  = GetMaxHeapChild(index, heap);
+            level_child = GetMaxLevelChild(index, heap);
+
+            if ((heap_child != -1) && (heap->data[index] < heap->data[heap_child]))
+            {
+                Swap(heap->data + index, heap->data + heap_child);
+                index = heap_child;
+                is_index_changed = 1;
+            }
+
+            if ((level_child != -1) && (heap->data[index] < heap->data[level_child]))
+            {
+                Swap(heap->data + index, heap->data + level_child);
+                index = level_child;
+                is_index_changed = 1;
+            }
+        }
+
+        if (!is_index_changed)
+        {
+            break;
+        }
+        is_index_changed = 0;
+    }
+
+    return OK;
 }
 
 int MinMaxHeapInsert(MinMaxHeap* const heap, int new_elem)
 {
+    assert((heap != NULL) && "Pointer to \'heap\' is NULL!!!\n");
+    assert((heap->data != NULL) && "Pointer to \'heap->data\' is NULL!!!\n");
 
+    heap->data[heap->size] = new_elem;
+    heap->size++;
+
+    SiftUp(heap, heap->size - 1);
 }
 
 int ExtractMin(MinMaxHeap* const heap, int* const buffer)
 {
-
+    
 }
 
 int ExtractMax(MinMaxHeap* const heap, int* const buffer)
