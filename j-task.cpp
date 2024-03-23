@@ -2,6 +2,7 @@
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 /*===Structs_&_Constants===*/
 
@@ -10,6 +11,8 @@ typedef struct MinMaxHeap
     int* data;
     int  size;
 } MinMaxHeap;
+
+const int MAX_CMD_LEN = 16;
 
 const int INCORRECT_VALUE = -1;
 
@@ -23,6 +26,21 @@ const int MIN_LEVEL = 1;
 const int MAX_LEVEL = 0;
 
 const int START_CAPACITY = 2 * 1e5;
+
+const char* const INSERT_CMD            = "insert";
+const int         INSERT_CMD_LEN        = 6;
+const char* const EXTRACT_MIN_CMD       = "extract_min";
+const int         EXTRACT_MIN_CMD_LEN   = 11;
+const char* const EXTRACT_MAX_CMD       = "extract_max";
+const int         EXTRACT_MAX_CMD_LEN   = 11;
+const char* const GET_MIN_CMD           = "get_min";
+const int         GET_MIN_CMD_LEN       = 7;
+const char* const GET_MAX_CMD           = "get_max";
+const int         GET_MAX_CMD_LEN       = 7;
+const char* const SIZE_CMD              = "size";
+const int         SIZE_CMD_LEN          = 4;
+const char* const CLEAR_CMD             = "clear";
+const int         CLEAR_CMD_LEN         = 5;
 
 /*===Function_Declaration===*/
 
@@ -49,13 +67,120 @@ int  ExtractMax(MinMaxHeap* const heap, int* const buffer);
 int  GetMin(MinMaxHeap* const heap, int* const buffer);
 int  GetMax(MinMaxHeap* const heap, int* const buffer);
 
+int  MinMaxHeapClear(MinMaxHeap* const heap);
+
+void ExecuteCommand(MinMaxHeap* const heap);
+
 /*===Function_Definition===*/
 
 int main()
 {
-    
+    MinMaxHeap my_heap = {};
+
+    MinMaxHeapCtor(&my_heap, START_CAPACITY);
+
+    int number_of_commands = 0;
+
+    if (scanf("%d", &number_of_commands) != 1)
+    {
+        assert(FALSE && "Program can not read the number!\n");
+    }
+
+    for (int i = 0; i < number_of_commands; i++)
+    {
+        ExecuteCommand(&my_heap);
+    }
+
+    MinMaxHeapDtor(&my_heap);
 
     return 0;
+}
+
+void ExecuteCommand(MinMaxHeap* const heap)
+{
+    assert((heap != NULL) && "Pointer to \'heap\' is NULL!!!\n");
+
+    char command[MAX_CMD_LEN];
+    int  buffer = 0;
+
+    if (scanf("%s", command) != 0)
+    {
+        assert(FALSE && "Program can not read the string!\n");
+    }
+
+    if (strncmp(command, INSERT_CMD, INSERT_CMD_LEN) == 0)
+    {
+        if (scanf("%d", &buffer) != 1)
+        {
+            assert(FALSE && "Program can not read the number!\n");
+        }
+
+        if (MinMaxHeapInsert(heap, buffer) == OK)
+        {
+            printf("ok\n");
+        }
+        else
+        {
+            printf("error\n");
+        }
+    }
+    else if (strncmp(command, EXTRACT_MIN_CMD, EXTRACT_MIN_CMD_LEN) == 0)
+    {
+        if (ExtractMin(heap, &buffer) == OK)
+        {
+            printf("%d\n", buffer);
+        }
+        else
+        {
+            printf("error\n");
+        }
+    }
+    else if (strncmp(command, EXTRACT_MAX_CMD, EXTRACT_MAX_CMD_LEN) == 0)
+    {
+        if (ExtractMax(heap, &buffer) == OK)
+        {
+            printf("%d\n", buffer);
+        }
+        else
+        {
+            printf("error\n");
+        }
+    }
+    else if (strncmp(command, GET_MIN_CMD, GET_MIN_CMD_LEN) == 0)
+    {
+        if (GetMin(heap, &buffer) == OK)
+        {
+            printf("%d\n", buffer);
+        }
+        else
+        {
+            printf("error\n");
+        }
+    }
+    else if (strncmp(command, GET_MAX_CMD, GET_MAX_CMD_LEN) == 0)
+    {
+        if (GetMax(heap, &buffer) == OK)
+        {
+            printf("%d\n", buffer);
+        }
+        else
+        {
+            printf("error\n");
+        }
+    }
+    else if (strncmp(command, SIZE_CMD, SIZE_CMD_LEN) == 0)
+    {
+        printf("%d\n", heap->size);
+    }
+    else if (strncmp(command, CLEAR_CMD, CLEAR_CMD_LEN) == 0)
+    {
+        MinMaxHeapClear(heap);
+        printf("ok\n");
+    }
+    else
+    {
+        assert(FALSE && "Illegal command!!!");
+    }
 }
 
 /*==========Secondary_functions==========*/
@@ -148,8 +273,8 @@ int GetMinLevelChild(int index, const MinMaxHeap* const heap)
     assert((heap != NULL) && "Pointer to \'heap\' is NULL!!!\n");
     assert((heap->data != NULL) && "Pointer to \'heap->data\' is NULL!!!\n");
 
-    int left_child  = GetMinChild(index * 2 + 1);
-    int right_child = GetMinChild(index * 2 + 2);
+    int left_child  = GetMinHeapChild(index * 2 + 1, heap);
+    int right_child = GetMinHeapChild(index * 2 + 2, heap);
 
     if (left_child == INCORRECT_VALUE)
     {
@@ -169,8 +294,8 @@ int GetMaxLevelChild(int index, const MinMaxHeap* const heap)
     assert((heap != NULL) && "Pointer to \'heap\' is NULL!!!\n");
     assert((heap->data != NULL) && "Pointer to \'heap->data\' is NULL!!!\n");
 
-    int left_child  = GetMinChild(index * 2 + 1);
-    int right_child = GetMinChild(index * 2 + 2);
+    int left_child  = GetMaxHeapChild(index * 2 + 1, heap);
+    int right_child = GetMaxHeapChild(index * 2 + 2, heap);
 
     if (left_child == INCORRECT_VALUE)
     {
@@ -231,7 +356,7 @@ int SiftUp(MinMaxHeap* const heap, int index)
             if (heap->data[cur_parent] < heap->data[index])
             {
                 Swap(heap->data + cur_parent, heap->data + index);
-                index = parent;
+                index = cur_parent;
                 is_index_changed = 1;
             }
 
@@ -247,7 +372,7 @@ int SiftUp(MinMaxHeap* const heap, int index)
             if (heap->data[cur_parent] > heap->data[index])
             {
                 Swap(heap->data + cur_parent, heap->data + index);
-                index = parent;
+                index = cur_parent;
                 is_index_changed = 1;
             }
 
@@ -338,6 +463,8 @@ int MinMaxHeapInsert(MinMaxHeap* const heap, int new_elem)
     heap->size++;
 
     SiftUp(heap, heap->size - 1);
+
+    return OK;
 }
 
 int ExtractMin(MinMaxHeap* const heap, int* const buffer)
@@ -376,7 +503,7 @@ int ExtractMax(MinMaxHeap* const heap, int* const buffer)
     else if (heap->size == 2)
     {
         heap->size--;
-        *buffer = heap->size[1];
+        *buffer = heap->data[1];
         return OK;
     }
 
@@ -384,13 +511,13 @@ int ExtractMax(MinMaxHeap* const heap, int* const buffer)
 
     if (heap->data[1] > heap->data[2])
     {
-        *buffer = heap->size[1];
+        *buffer = heap->data[1];
         heap->data[1] = heap->data[heap->size];
         SiftDown(heap, 1);
     }
     else
     {
-        *buffer = heap->size[2];
+        *buffer = heap->data[2];
         heap->data[2] = heap->data[heap->size];
         SiftDown(heap, 2);
     }
