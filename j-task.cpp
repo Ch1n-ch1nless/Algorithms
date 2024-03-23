@@ -563,3 +563,17 @@ int GetMax(MinMaxHeap* const heap, int* const buffer)
     *buffer = (heap->data[1] < heap->data[2]) ? heap->data[2] : heap->data[1];
     return OK;
 }
+
+int MinMaxHeapClear(MinMaxHeap* const heap)
+{
+    assert((heap != NULL) && "Pointer to \'heap\' is NULL!!!");
+
+    for (int i = 0; i < heap->size; i++)
+    {
+        heap->data[i] = 0;
+    }
+
+    heap->size = 0;
+
+    return OK;
+}
