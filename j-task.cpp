@@ -25,7 +25,7 @@ const int OK    = 1;
 const int MIN_LEVEL = 1;
 const int MAX_LEVEL = 0;
 
-const int START_CAPACITY = 2 * 1e5;
+const int START_CAPACITY = 2 * 1e6;
 
 const char* const INSERT_CMD            = "insert";
 const int         INSERT_CMD_LEN        = 6;
@@ -71,6 +71,7 @@ int  MinMaxHeapClear(MinMaxHeap* const heap);
 
 void ExecuteCommand(MinMaxHeap* const heap);
 
+
 /*===Function_Definition===*/
 
 int main()
@@ -103,7 +104,7 @@ void ExecuteCommand(MinMaxHeap* const heap)
     char command[MAX_CMD_LEN];
     int  buffer = 0;
 
-    if (scanf("%s", command) != 0)
+    if (scanf("%11s", command) == 0)
     {
         assert(FALSE && "Program can not read the string!\n");
     }
@@ -340,7 +341,7 @@ int MinMaxHeapDtor(MinMaxHeap* const heap)
 int SiftUp(MinMaxHeap* const heap, int index)
 {
     assert((heap != NULL) && "Pointer to heap is NULL!!!\n");
-    assert((-1 < index && index < heap->size) && "Incorrect value of index!\n");
+    assert((-1 < index && index <= heap->size) && "Incorrect value of index!\n");
 
     int cur_parent   = 0;
     int level_parent = 0;
@@ -359,8 +360,7 @@ int SiftUp(MinMaxHeap* const heap, int index)
                 index = cur_parent;
                 is_index_changed = 1;
             }
-
-            if (heap->data[level_parent] > heap->data[index])
+            else if ((level_parent != cur_parent) && heap->data[level_parent] > heap->data[index])
             {
                 Swap(heap->data + level_parent, heap->data + index);
                 index = level_parent;
@@ -375,8 +375,7 @@ int SiftUp(MinMaxHeap* const heap, int index)
                 index = cur_parent;
                 is_index_changed = 1;
             }
-
-            if (heap->data[level_parent] < heap->data[index])
+            else if ((level_parent != cur_parent) && heap->data[level_parent] < heap->data[index])
             {
                 Swap(heap->data + level_parent, heap->data + index);
                 index = level_parent;
@@ -397,7 +396,7 @@ int SiftUp(MinMaxHeap* const heap, int index)
 int SiftDown(MinMaxHeap* const heap, int index)
 {
     assert((heap != NULL) && "Pointer to heap is NULL!!!\n");
-    assert((-1 < index && index < heap->size) && "Incorrect value of index!\n");
+    assert((-1 < index && index <= heap->size) && "Incorrect value of index!\n");
 
     int heap_child       = 0;
     int level_child      = 0;
@@ -410,17 +409,35 @@ int SiftDown(MinMaxHeap* const heap, int index)
             heap_child  = GetMinHeapChild(index, heap);
             level_child = GetMinLevelChild(index, heap);
 
-            if ((heap_child != -1) && (heap->data[index] > heap->data[heap_child]))
+            if (level_child != -1)
+            {
+                if ((heap->data[heap_child] < heap->data[level_child]) && (heap->data[heap_child] < heap->data[index]))
+                {
+                    Swap(heap->data + index, heap->data + heap_child);
+                    index = heap_child;
+                    is_index_changed = 1;
+
+                    if (heap->data[level_child] < heap->data[index])
+                    {   
+                        Swap(heap->data + index, heap->data + level_child);
+                    }
+                }
+                else if (heap->data[level_child] < heap->data[index])
+                {
+                    Swap(heap->data + index, heap->data + level_child);
+                    index = level_child;
+                    is_index_changed = 1;
+
+                    if (heap->data[heap_child] < heap->data[index])
+                    {   
+                        Swap(heap->data + index, heap->data + heap_child);
+                    }
+                }
+            }
+            else if ((heap_child != -1) && (heap->data[heap_child] < heap->data[index]))
             {
                 Swap(heap->data + index, heap->data + heap_child);
                 index = heap_child;
-                is_index_changed = 1;
-            }
-
-            if ((level_child != -1) && (heap->data[index] > heap->data[level_child]))
-            {
-                Swap(heap->data + index, heap->data + level_child);
-                index = level_child;
                 is_index_changed = 1;
             }
         }
@@ -429,17 +446,35 @@ int SiftDown(MinMaxHeap* const heap, int index)
             heap_child  = GetMaxHeapChild(index, heap);
             level_child = GetMaxLevelChild(index, heap);
 
-            if ((heap_child != -1) && (heap->data[index] < heap->data[heap_child]))
+            if (level_child != -1)
+            {
+                if ((heap->data[heap_child] > heap->data[level_child]) && (heap->data[heap_child] > heap->data[index]))
+                {
+                    Swap(heap->data + index, heap->data + heap_child);
+                    index = heap_child;
+                    is_index_changed = 1;
+
+                    if (heap->data[level_child] > heap->data[index])
+                    {   
+                        Swap(heap->data + index, heap->data + level_child);
+                    }
+                }
+                else if (heap->data[level_child] > heap->data[index])
+                {
+                    Swap(heap->data + index, heap->data + level_child);
+                    index = level_child;
+                    is_index_changed = 1;
+
+                    if (heap->data[heap_child] > heap->data[index])
+                    {   
+                        Swap(heap->data + index, heap->data + heap_child);
+                    }
+                }
+            }
+            else if ((heap_child != -1) && (heap->data[heap_child] > heap->data[index]))
             {
                 Swap(heap->data + index, heap->data + heap_child);
                 index = heap_child;
-                is_index_changed = 1;
-            }
-
-            if ((level_child != -1) && (heap->data[index] < heap->data[level_child]))
-            {
-                Swap(heap->data + index, heap->data + level_child);
-                index = level_child;
                 is_index_changed = 1;
             }
         }
