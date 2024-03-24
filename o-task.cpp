@@ -8,7 +8,6 @@
 
 typedef struct Node
 {
-    int         index;
     int         request;
     long long   value;
 } Node;
@@ -18,24 +17,24 @@ typedef struct MinHeap
     size_t      size;
     size_t      capacity;
     Node*       data;
-    Node**      requests_array;
+    int*        address_array;
 } MinHeap;
 
 const int POISON_VALUE = INT_MAX;
 
-const size_t START_CAPACITY = 1e7;
+const size_t START_CAPACITY = 1e6 + 1;
 
 const int FALSE = 0;
 const int TRUE  = 1;
 
-const char* const INSERT_COMMAND   = "insert";
-const size_t INSERT_LEN   = 6;
-const char* const GETMIN_COMMAND   = "getMin";
-const size_t GETMIN_LEN   = 6;
-const char* const EXTRACT_COMMAND  = "extractMin";
-const size_t EXTRACT_LEN  = 10;
-const char* const DECREASE_COMMAND = "decreaseKey";
-const size_t DECREASE_LEN = 11;
+const char* const INSERT_COMMAND    = "insert";
+const size_t      INSERT_LEN        = 6;
+const char* const GET_MIN_COMMAND   = "getMin";
+const size_t      GET_MIN_LEN       = 6;
+const char* const EXTRACT_COMMAND   = "extractMin";
+const size_t      EXTRACT_LEN       = 10;
+const char* const DECREASE_COMMAND  = "decreaseKey";
+const size_t      DECREASE_LEN      = 11;
 
 /*===Function_Declaration===*/
 
@@ -57,8 +56,6 @@ void        DecreaseKey(MinHeap* const heap, int delta, int request);
 
 void        ExecuteCommands(MinHeap* const heap);
 
-//void        PrintHeap(MinHeap* const heap);
-
 /*===Function_Definition===*/
 
 int main()
@@ -78,7 +75,7 @@ void ExecuteCommands(MinHeap* const heap)
 {
     assert((heap != NULL) && "Pointer to \'heap\' is NULL!!!\n");
     assert((heap->data != NULL) && "Pointer to \'heap->data\' is NULL!!!\n");
-    assert((heap->requests_array != NULL) && "Pointer to \'heap->requests_array\' is NULL!!!\n");
+    assert((heap->address_array != NULL) && "Pointer to \'heap->address_array\' is NULL!!!\n");
 
     char command[12];
 
@@ -86,7 +83,6 @@ void ExecuteCommands(MinHeap* const heap)
     int         index  = 0;
     int         delta  = 0;
     long long   number = 0;
-    int         insert_request = 0; 
 
     if (scanf("%ld", &number_of_requests) != 1)
     {
@@ -107,10 +103,9 @@ void ExecuteCommands(MinHeap* const heap)
                 assert(FALSE && "Program can not read the number!!!\n");
             }
 
-            HeapInsert(heap, number, insert_request);
-            insert_request++;
+            HeapInsert(heap, number, i);
         }
-        else if (strncmp(command, GETMIN_COMMAND, GETMIN_LEN) == 0)
+        else if (strncmp(command, GET_MIN_COMMAND, GET_MIN_LEN) == 0)
         {
             number = GetMin(heap);
             printf("%lld\n", number);
@@ -132,8 +127,6 @@ void ExecuteCommands(MinHeap* const heap)
         {
             assert(FALSE && "Illegal command!!!\n");
         }
-
-        //PrintHeap(heap);
     }
 }
 
@@ -147,21 +140,21 @@ void HeapCtor(MinHeap* const heap, const size_t start_capacity)
     heap->data = (Node*) calloc(start_capacity, sizeof(Node));
     assert((heap->data != NULL) && "Program can not allocate memory!\n");
 
-    heap->requests_array = (Node**) calloc(start_capacity, sizeof(Node*));
-    assert((heap->requests_array != NULL) && "Program can not allocate memory!\n");
+    heap->address_array = (int*) calloc(start_capacity, sizeof(int));
+    assert((heap->address_array != NULL) && "Program can not allocate memory!\n");
 }
 
 void HeapDtor(MinHeap* const heap)
 {
     assert((heap != NULL) && "Pointer to \'heap\' is NULL!!!\n");
     assert((heap->data != NULL) && "Pointer to \'heap->data\' is NULL!!!\n");
-    assert((heap->requests_array != NULL) && "Pointer to \'heap->requests_array\' is NULL!!!\n");
+    assert((heap->address_array != NULL) && "Pointer to \'heap->address_array\' is NULL!!!\n");
 
     free(heap->data);
     heap->data = NULL;
 
-    free(heap->requests_array);
-    heap->requests_array = NULL;
+    free(heap->address_array);
+    heap->address_array = NULL;
 
     heap->size     = 0;
     heap->capacity = 0;
@@ -171,33 +164,38 @@ void ReallocUp(MinHeap* const heap)
 {
     assert((heap != NULL) && "Pointer to \'heap\' is NULL!!!\n");
     assert((heap->data != NULL) && "Pointer to \'heap->data\' is NULL!!!\n");
-    assert((heap->requests_array != NULL) && "Pointer to \'heap->requests_array\' is NULL!!!\n");
+    assert((heap->address_array != NULL) && "Pointer to \'heap->address_array\' is NULL!!!\n");
 
     heap->data = (Node*) realloc(heap->data, 2 * heap->capacity);
     assert((heap->data != NULL) && "Program can not allocate memory!\n");
 
     heap->capacity *= 2;
 
-    heap->requests_array = (Node**) realloc(heap->requests_array, heap->capacity);
-    assert((heap->requests_array != NULL) && "Program can not allocate memory!\n");
+    heap->address_array = (int*) realloc(heap->address_array, heap->capacity);
+    assert((heap->address_array != NULL) && "Program can not allocate memory!\n");
 }
 
 void SwapNodes(MinHeap* const heap, size_t index1, size_t index2)
 {
     assert((heap != NULL) && "Pointer to \'heap\' is NULL!!!\n");
     assert((heap->data != NULL) && "Pointer to \'heap->data\' is NULL!!!\n");
-    assert((heap->requests_array != NULL) && "Pointer to \'heap->requests_array\' is NULL!!!\n");
+    assert((heap->address_array != NULL) && "Pointer to \'heap->address_array\' is NULL!!!\n");
 
-    heap->data[index1].index = index2;
-    heap->data[index2].index = index1;
+    Node temp_node = {};
 
-    Node temp_node = heap->data[index1];
-    heap->data[index1] = heap->data[index2];
-    heap->data[index2] = temp_node;
+    //Swap addresses in address array!
+    heap->address_array[heap->data[index1].request] = index2;
+    heap->address_array[heap->data[index2].request] = index1;
 
-    Node* temp_ptr = heap->requests_array[heap->data[index1].request];
-    heap->requests_array[heap->data[index1].request] = heap->requests_array[heap->data[index2].request];
-    heap->requests_array[heap->data[index2].request] = temp_ptr;
+    //Swap Nodes!
+    temp_node.value   = heap->data[index1].value;
+    temp_node.request = heap->data[index1].request;
+
+    heap->data[index1].value   = heap->data[index2].value;
+    heap->data[index1].request = heap->data[index2].request;
+
+    heap->data[index2].value   = temp_node.value;
+    heap->data[index2].request = temp_node.request;
 }
 
 void SiftDown(MinHeap* const heap, size_t index)
@@ -260,9 +258,8 @@ long long ExtractMin(MinHeap* const heap)
 
     SwapNodes(heap, 0, heap->size -1);
     heap->data[--heap->size].value = POISON_VALUE;
-    heap->requests_array[heap->data[heap->size].request] = NULL;
+    heap->address_array[heap->data[heap->size].request] = -1;
     heap->data[heap->size].request = -1;
-    heap->data[heap->size].index   = -1;
 
     SiftDown(heap, 0);
 
@@ -273,7 +270,7 @@ void HeapInsert(MinHeap* const heap, long long value, int request)
 {
     assert((heap != NULL) && "Pointer to \'heap\' is NULL!!!\n");
     assert((heap->data != NULL) && "Pointer to \'heap->data\' is NULL!!!\n");
-    assert((heap->requests_array != NULL) && "Pointer to \'heap->requests_array\' is NULL!!!\n");
+    assert((heap->address_array != NULL) && "Pointer to \'heap->address_array\' is NULL!!!\n");
 
     if (heap->size >= heap->capacity)
     {
@@ -282,9 +279,8 @@ void HeapInsert(MinHeap* const heap, long long value, int request)
 
     heap->data[heap->size].value   = value;
     heap->data[heap->size].request = request;
-    heap->data[heap->size].index   = heap->size;
 
-    heap->requests_array[request] = &heap->data[heap->size];
+    heap->address_array[request] = heap->size;
 
     heap->size++;
 
@@ -295,7 +291,7 @@ long long GetMin(MinHeap* const heap)
 {
     assert((heap != NULL) && "Pointer to \'heap\' is NULL!!!\n");
     assert((heap->data != NULL) && "Pointer to \'heap->data\' is NULL!!!\n");
-    assert((heap->requests_array != NULL) && "Pointer to \'heap->requests_array\' is NULL!!!\n");
+    assert((heap->address_array != NULL) && "Pointer to \'heap->address_array\' is NULL!!!\n");
 
     return heap->data[0].value;
 }
@@ -305,41 +301,11 @@ void DecreaseKey(MinHeap* const heap, int delta, int request)
 {
     assert((heap != NULL) && "Pointer to \'heap\' is NULL!!!\n");
     assert((heap->data != NULL) && "Pointer to \'heap->data\' is NULL!!!\n");
-    assert((heap->requests_array != NULL) && "Pointer to \'heap->requests_array\' is NULL!!!\n");
+    assert((heap->address_array != NULL) && "Pointer to \'heap->address_array\' is NULL!!!\n");
 
-    int index = (heap->requests_array[request])->index;
+    int index = heap->address_array[request];
 
     heap->data[index].value -= delta;
 
     SiftUp(heap, index);
 }
-
-/*void PrintHeap(MinHeap* const heap)
-{
-    assert((heap != NULL) && "Pointer to \'heap\' is NULL!!!\n");
-    assert((heap->data != NULL) && "Pointer to \'heap->data\' is NULL!!!\n");
-    assert((heap->requests_array != NULL) && "Pointer to \'heap->requests_array\' is NULL!!!\n");
-
-    for (int i = 0; i < heap->size; i++)
-    {
-        printf("|%6d|", i);
-    }
-    printf("\n");
-
-    for (int i = 0; i < heap->size; i++)
-    {
-        printf("|%6d|", heap->data[i].value);
-    }
-    printf("\n");
-    for (int i = 0; i < heap->size; i++)
-    {
-        printf("|%6d|", heap->data[i].request);
-    }
-    printf("\n");
-
-    for (int i = 0; i < 10; i++)
-    {
-        printf("|%6d|", heap->requests_array[i]);
-    }
-    printf("\n==============================================\n");
-}*/
