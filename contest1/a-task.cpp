@@ -3,7 +3,9 @@
 #include <assert.h>
 #include <stdlib.h>
 
-#define FALSE 0
+#define FALSE   0
+#define ERROR   0
+#define OK      1
 
 /*===Structs_&_Constants===*/
 
@@ -27,13 +29,13 @@ const char* const   EXIT_CMD   = "exit";
 
 void 	ReadCommands(Stack* const stack);
 
-void    StackCtor(Stack* const stack);
-void    StackDtor(Stack* const stack);
+int     StackCtor(Stack* const stack);
+int     StackDtor(Stack* const stack);
 
-void    StackPush(Stack* const stack, const int number);
-void    StackPop(Stack* const stack);
-void    StackTop(Stack* const stack);
-void    StackClear(Stack* const stack);
+int     StackPush(Stack* const stack, const int number);
+int     StackPop(Stack* const stack, int* const buffer);
+int     StackTop(Stack* const stack, int* const buffer);
+int     StackClear(Stack* const stack);
 
 /*===Function_Definition===*/
 
@@ -56,33 +58,49 @@ void ReadCommands(Stack* const stack)
     assert(stack);
     
     char contest_command[6] = {}; //Char array, in which the command is stored
-    int  number = 0;    	  //number, which will be pushed
+    int  buffer = 0;    	      //number, which will be pushed
     
-    //Read the first command
-    if (scanf("%6s", contest_command) == 0)
+    do
     {
-	assert(FALSE && "Program can not read the string!");
-    }
-    
+        //Read the command
+        if (scanf("%6s", contest_command) == 0)
+        {
+	        assert(FALSE && "Program can not read the string!");
+        }
 
-    while (strcmp(contest_command, EXIT_CMD) != 0)
-    {
         if (strcmp(contest_command, PUSH_CMD) == 0)
         {
             //Read the number
-            if (scanf("%d", &number) == 0)
+            if (scanf("%d", &buffer) == 0)
             {
               	assert(FALSE && "Program can not read the number");
             }
-            StackPush(stack, number);
+            if (StackPush(stack, buffer) == OK)
+            {
+                printf("ok\n");
+            }
         }
         else if (strcmp(contest_command, POP_CMD) == 0)
         {
-            StackPop(stack);
+            if (StackPop(stack, &buffer) == ERROR)
+            {
+                printf("error\n");
+            }
+            else
+            {
+                printf("%d\n", buffer);
+            }
         }
         else if (strcmp(contest_command, BACK_CMD) == 0)
         {
-            StackTop(stack);
+            if (StackTop(stack, &buffer) == ERROR)
+            {
+                printf("error\n");
+            }
+            else
+            {
+                printf("%d\n", buffer);
+            }
         }
         else if (strcmp(contest_command, SIZE_CMD) == 0)
         {
@@ -90,18 +108,16 @@ void ReadCommands(Stack* const stack)
         }
         else if (strcmp(contest_command, CLEAR_CMD) == 0)
         {
-            StackClear(stack);
+            if (StackClear(stack) == OK)
+            {
+                printf("ok\n");
+            }
         }
-
-        //Read next command
-        if (scanf("%6s", contest_command) == 0)
-    	{
-	    assert(FALSE && "Program can not read the string!");
-    	}
     }
+    while (strcmp(contest_command, EXIT_CMD) != 0);
 }
 
-void StackCtor(Stack* const stack)
+int StackCtor(Stack* const stack)
 {
     assert(stack);
 
@@ -109,9 +125,12 @@ void StackCtor(Stack* const stack)
     stack->capacity = MAX_VALUE_OF_CAPACITY;
 
     stack->data = (int*) calloc(stack->capacity, sizeof(int));
+    assert((stack->data != NULL) && "Program can not allocate memory!\n");
+
+    return OK;
 }
 
-void StackDtor(Stack* const stack)
+int StackDtor(Stack* const stack)
 {
     assert((stack != NULL) && "Pointer to stack is NULL!!!\n");
 
@@ -121,9 +140,11 @@ void StackDtor(Stack* const stack)
     stack->size     = 0;
     stack->capacity = 0;
 
+    return OK;
+
 }
 
-void StackPush(Stack* const stack, const int number)
+int StackPush(Stack* const stack, const int number)
 {
     assert((stack != NULL) && "Pointer to stack is NULL!!!\n");
 
@@ -131,45 +152,48 @@ void StackPush(Stack* const stack, const int number)
 
     stack->size++;
 
-    printf("ok\n");
+    return OK;
 }
 
-void StackPop(Stack* const stack)
+int StackPop(Stack* const stack, int* const buffer)
 {
     assert((stack != NULL) && "Pointer to stack is NULL!!!\n");
 
     if (stack->size == 0)
     {
-        printf("error\n");
+        return ERROR;
     }
     else
     {
-        printf("%d\n", stack->data[stack->size-1]);
+        *buffer = stack->data[stack->size-1];
         stack->size--;
+        return OK;
     }
 }
 
-void StackTop(Stack* const stack)
+int StackTop(Stack* const stack, int* const buffer)
 {
     assert((stack != NULL) && "Pointer to stack is NULL!!!\n");
 
     if (stack->size == 0)
     {
-        printf("error\n");
+        return ERROR;
     }
     else
     {
-        printf("%d\n", stack->data[stack->size-1]);
+        *buffer = stack->data[stack->size-1];
+        stack->size--;
+        return OK;
     }
 }
 
-void StackClear(Stack* const stack)
+int StackClear(Stack* const stack)
 {
     assert((stack != NULL) && "Pointer to stack is NULL!!!\n");
 
     memset(stack->data, 0, stack->size);
     stack->size = 0;
 
-    printf("ok\n");
+    return OK;
 }
 
