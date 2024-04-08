@@ -46,6 +46,10 @@ void        ReallocDown(MinHeap* const heap);
 
 void        SwapNodes(MinHeap* const heap, size_t index1, size_t index2);
 
+size_t      GetLeftChild(size_t index);
+size_t      GetRightChild(size_t index);
+size_t      GetParent(size_t index);
+
 void        SiftDown(MinHeap* const heap, size_t index); 
 void        SiftUp(MinHeap* const heap, size_t index);
 
@@ -198,14 +202,29 @@ void SwapNodes(MinHeap* const heap, size_t index1, size_t index2)
     heap->data[index2].request = temp_node.request;
 }
 
+size_t GetLeftChild(size_t index)
+{
+    return index * 2 + 1;
+}
+
+size_t GetRightChild(size_t index)
+{
+    return index * 2 + 1;
+}
+
+size_t GetParent(size_t index)
+{
+    return (index - 1) / 2;
+}
+
 void SiftDown(MinHeap* const heap, size_t index)
 {
     assert((heap != NULL) && "Pointer to \'heap\' is NULL!!!\n");
     assert((heap->data != NULL) && "Pointer to \'heap->data\' is NULL!!!\n");
     assert((index <= heap->size) && "Incorrect value of index!\n");
 
-    size_t left_child  = 2 * index + 1;
-    size_t right_child = 2 * index + 2;
+    size_t left_child  = GetLeftChild(index);
+    size_t right_child = GetRightChild(index);
     size_t min_index   = index;
 
     if (left_child < heap->size && heap->data[left_child].value < heap->data[min_index].value)
@@ -235,7 +254,7 @@ void SiftUp(MinHeap* const heap, size_t index)
 
     while (index != 0)
     {
-        parent = (index - 1) / 2;
+        parent = GetParent(index);
 
         if (heap->data[parent].value > heap->data[index].value)
         {
