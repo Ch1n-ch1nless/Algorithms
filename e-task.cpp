@@ -3,8 +3,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "tree_dump.h"
-
 #define MAX(a, b)   (a < b) ? b : a
 #define MIN(a, b)   (a < b) ? a : b
 
@@ -18,6 +16,20 @@ const int   MODULE              =  1000000000;
 const int   KEY_IS_NOT_FOUND    = -1;    
 
 /*===================Structs==================*/
+
+typedef struct Node
+{
+    int             key;
+    size_t          height;
+    struct Node*    left;
+    struct Node*    right;
+} Node;
+
+typedef struct AVLTree
+{
+    Node*   root;
+    size_t  size;
+} AVLTree;
 
 /*==================Functions=================*/
 
@@ -90,7 +102,6 @@ void ExecuteCommands(AVLTree* avl_tree, size_t number_of_commands)
             case '+':
             {
                 Add(avl_tree, (key + answer) % MODULE);
-                TreeGraphDump(avl_tree);
                 answer = 0;
                 break;
             }
@@ -345,13 +356,8 @@ void FixHeight(Node* node)
         return;
     }
     
-    printf("\tNode := %d\n", node->key);
-    printf("\tHeight of node->right: %ld\n", Height(node->right));
-    printf("\tHeight of node->left: %ld\n", Height(node->left));
-
     node->height = MAX(Height(node->left), Height(node->right));
     node->height = node->height + 1;
-    printf("Now height is %ld\n", node->height);
 }
 
 int CalculateBalance(Node* node)
