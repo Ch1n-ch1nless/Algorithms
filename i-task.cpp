@@ -5,22 +5,17 @@
 
 /*==================Constants=================*/
 
-const int   TRUE    = 1;
-const int   FALSE   = 0;
+#define MAX_SIZE 1000
+
+const int       TRUE        = 1;
+const int       FALSE       = 0;
 
 /*===================Structs==================*/
 
-typedef struct 
-{
-    char*   str1;
-    char*   str2;
-} key_t;
-
-const key_t POISON_VALUE = {NULL, NULL};
-
 typedef struct Node
 {
-    key_t           key;
+    char*           key1;
+    char*           key2;
     struct Node*    left_child;
     struct Node*    right_child;
     struct Node*    parent;
@@ -36,7 +31,7 @@ typedef struct SplayTree
 
 //vv~~~~~~~~~~~~Secondary functions~~~~~~~~~~~vv
 
-Node*   NodeCtor(key_t key);
+Node*   NodeCtor(char* key1, char* key2);
 void    NodeDtor(Node* node);
 
 Node*   GetParent(     Node* node);
@@ -52,9 +47,10 @@ void    Zig(   Node* node);
 void    ZigZig(Node* node);
 void    ZigZag(Node* node);
 
-Node*   SubTreeSplay( Node* root, key_t key);
-Node*   SubTreeSearch(Node* root, key_t key);
-Node*   SubTreeInsert(Node* root, key_t key);
+Node*   SubTreeSplay( Node* root);
+
+Node*   SubTreeSearch(Node* root, char* key);
+Node*   SubTreeInsert(Node* root, char* key1, char* key2);
 void    SubTreeDtor(  Node* root);
 
 //^^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
@@ -64,13 +60,18 @@ void    SubTreeDtor(  Node* root);
 SplayTree*  SplayTreeCtor(void);
 void        SplayTreeDtor(SplayTree* splay_tree);
 
-void        SplayTreeSearch(SplayTree* splay_tree, key_t key);
-void        SplayTreeInsert(SplayTree* splay_tree, key_t key);
+char*       SplayTreeSearch(SplayTree* splay_tree, char* key);
+void        SplayTreeInsert(SplayTree* splay_tree, char* key1, char* key2);
 
 //^^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
 
-void        AddStormtroopersToSplayTree( SplayTree* splay_tree, size_t number);
+void        AddStormtroopersToSplayTree( SplayTree* splay_tree, char** key_buffer, size_t number);
 void        FindStormtroopersInSplayTree(SplayTree* splay_tree, size_t number);
+
+char**      KeyBufferBuild(size_t number_of_keys);
+void        KeyBufferDelete(char** key_buffer, size_t number_of_keys);
+
+void        Dump(SplayTree* splay_tree);
 
 /*============================================*/
 
@@ -79,43 +80,122 @@ int main()
     size_t N = 0;
     size_t Q = 0;
 
-    if (scanf("%d", &N) == 0)
+    if (scanf("%lu", &N) == 0)
     {
         assert(FALSE && "ERROR!!! Program can not read the number!\n");
     }
 
     SplayTree* splay_tree = SplayTreeCtor();
 
-    AddStormtroopersToSplayTree(splay_tree, N);
+    char** key_buffer     = KeyBufferBuild(N * 2);
 
-    if (scanf("%d", &Q) == 0)
+    AddStormtroopersToSplayTree(splay_tree, key_buffer, N);
+
+    if (scanf("%lu", &Q) == 0)
     {
         assert(FALSE && "ERROR!!! Program can not read the number!\n");
     }
 
     FindStormtroopersInSplayTree(splay_tree, Q);
 
+    KeyBufferDelete(key_buffer, 2 * N);
+
     SplayTreeDtor(splay_tree);
 
     return 0;
 }
 
-void AddStormtroopersToSplayTree(SplayTree* splay_tree, size_t number)
+void AddStormtroopersToSplayTree( SplayTree* splay_tree, char** key_buffer, size_t number)
 {
     assert((splay_tree != NULL) && "ERROR!!! Pointer to \'splay_tree\' is NULL!\n");
 
+    char key1[MAX_SIZE] = {};
+    char key2[MAX_SIZE] = {};
+
     for (size_t i = 0; i < number; i++)
     {
-        key_t* key = (key_t*) calloc(1, sizeof(key_t));
+        if (scanf("%999s", key_buffer[2*i]) == 0)
+        {
+            assert(FALSE && "ERROR!!! Program can not read the string!\n");
+        }
+
+        if (scanf("%999s", key_buffer[2*i+1]) == 0)
+        {
+            assert(FALSE && "ERROR!!! Program can not read the string!\n");
+        }
+
+        SplayTreeInsert(splay_tree, key_buffer[2*i], key_buffer[2*i+1]);
+
+        //Dump(splay_tree);
     }
 }
 
-Node* NodeCtor(key_t key)
+void FindStormtroopersInSplayTree(SplayTree* splay_tree, size_t number)
 {
-    Node* new_node = (Node*) calloc(1, sizeof(Node));
-    assert((new_node != NULL) && "ERROR!!! Program can not allocate memory!\n");
+    assert((splay_tree != NULL) && "ERROR!!! Pointer to \'splay_tree\' is NULL!\n");
 
-    new_node->key           = key;
+    char    key[MAX_SIZE]   = {};
+    char*   answer          = NULL;
+
+    for (size_t i = 0; i < number; i++)
+    {
+        if (scanf("%999s", key) == 0)
+        {
+            assert(FALSE && "ERROR!!! Program can not read the string!\n");
+        }
+
+        answer = SplayTreeSearch(splay_tree, key);
+
+        if (answer == NULL)
+        {
+            assert(FALSE && "ERROR!!! Program can not find the key in splay_tree");
+        }
+        else
+        {
+            printf("%s\n", answer);
+        }
+    }
+}
+
+char** KeyBufferBuild(size_t number_of_keys)
+{
+    char** new_key_buffer   = (char**) calloc(number_of_keys, sizeof(char*));\
+    assert((new_key_buffer != NULL) && "ERROR!!! Program can not allocate memory!\n");
+
+    for (size_t i = 0; i < number_of_keys; i++)
+    {
+        new_key_buffer[i] = (char*) calloc(MAX_SIZE, sizeof(char));
+        assert((new_key_buffer[i] != NULL) && "ERROR!!! Program can not allocate memory!\n");
+    }
+
+    return new_key_buffer;
+}
+
+void KeyBufferDelete(char** key_buffer, size_t number_of_keys)
+{
+    assert((key_buffer != NULL) && "ERROR!!! Pointer to \'key_buffer\' is NULL!\n");
+
+    for (size_t i = 0; i < number_of_keys; i++)
+    {
+        free(key_buffer[i]);
+        key_buffer[i] = NULL;
+    }
+
+    free(key_buffer);
+}
+
+
+Node* NodeCtor(char* key1, char* key2)
+{
+    assert((key1 != NULL) && "ERROR!!! Pointer to \'key1\' is NULL!\n");
+    assert((key2 != NULL) && "ERROR!!! Pointer to \'key2\' is NULL!\n");
+
+    Node* new_node = (Node*) calloc(1, sizeof(Node));
+    assert((new_node != NULL) && "ERROR!!! Pointer to \'new_node\' is NULL!\n");
+
+    new_node->key1          = key1;
+    new_node->key2          = key2;
+
     new_node->left_child    = NULL;
     new_node->right_child   = NULL;
     new_node->parent        = NULL;
@@ -127,12 +207,15 @@ void NodeDtor(Node* node)
 {
     assert((node != NULL) && "ERROR!!! Pointer to \'node\' is NULL!\n");
 
-    node->key           = POISON_VALUE;
+    //Null the lines
+    node->key1          = NULL;
+    node->key2          = NULL;
+
     node->left_child    = NULL;
     node->right_child   = NULL;
-    node->parent        = NULL; 
+    node->parent        = NULL;
 
-    free(node);     
+    free(node);
 }
 
 Node* GetParent(Node* node)
@@ -277,16 +360,16 @@ void ZigZag(Node* node)
     if (IsRightChild(node)) 
     {
       RotateLeft(GetParent(node));
-      RotateRight(GetGrandParent(node));
+      RotateRight(GetParent(node));
     } 
     else 
     {
       RotateRight(GetParent(node));
-      RotateLeft(GetGrandParent(node));
+      RotateLeft(GetParent(node));
     }
 }
 
-Node* SubTreeSplay(Node* root, key_t key)
+Node* SubTreeSplay(Node* root)
 {
     while (GetParent(root) != NULL)
     {
@@ -309,56 +392,76 @@ Node* SubTreeSplay(Node* root, key_t key)
     return root;
 }
 
-Node* SubTreeSearch(Node* root, key_t key)
+Node* SubTreeSearch(Node* root, char* key)
 {
-    return SubTreeSplay(root, key);
+    Node* next = NULL;
+
+    while (root != NULL)
+    {
+        next = NULL;
+
+        if (strncmp(key, root->key1, MAX_SIZE) == 0)
+        {
+            return root;
+        }
+        else if (strncmp(key, root->key1, MAX_SIZE) < 0)
+        {
+            next = root->left_child;
+        }
+        else
+        {
+            next = root->right_child;
+        }
+
+        root = next;
+    }
+
+    return NULL;
 }
 
-Node* SubTreeInsert(Node* root, key_t key)
-{
-    Node* new_node = NodeCtor(key);
+Node* SubTreeInsert(Node* root, char* key1, char* key2)
+{  
+    Node* new_node  = NodeCtor(key1, key2);
 
     if (root == NULL)
     {
         return new_node;
     }
 
-    Node* prev = NULL;
-    Node* next = NULL;
+    Node* prev      = NULL;
+    Node* next      = NULL;
 
-    int is_left_child = FALSE;
+    int   is_left   = FALSE;
 
     while (root != NULL)
     {
-        if (key <= root->key)
+        if (strncmp(key1, root->key1, MAX_SIZE) <= 0)
         {
-            next = root->left_child;
-            is_left_child = TRUE;
+            next    = root->left_child;
+            is_left = TRUE;
         }
         else
         {
-            next = root->right_child;
-            is_left_child = FALSE;
+            next    = root->right_child;
+            is_left = FALSE;
         }
 
         prev = root;
         root = next;
     }
 
-    if (is_left_child)
+    if (is_left)
     {
         prev->left_child    = new_node;
         new_node->parent    = prev;
     }
     else
     {
-        prev->right_child    = new_node;
+        prev->right_child   = new_node;
         new_node->parent    = prev;
     }
 
-    SubTreeSplay(new_node, key);
-
-    return new_node;    
+    return SubTreeSplay(new_node);
 }
 
 void SubTreeDtor(Node* root)
@@ -370,20 +473,19 @@ void SubTreeDtor(Node* root)
 
     SubTreeDtor(root->left_child);
     SubTreeDtor(root->right_child);
+
     NodeDtor(root);
 }
 
-
-
 SplayTree*  SplayTreeCtor(void)
 {
-    SplayTree* splay_tree = (SplayTree*) calloc(1, sizeof(SplayTree));
-    assert((splay_tree != NULL) && "ERROR!!! Program can not allocate memory!\n");
+    SplayTree* new_splay_tree = (SplayTree*) calloc(1, sizeof(SplayTree));
+    assert((new_splay_tree != NULL) && "ERROR!!! Program can not allocate memory!\n");
 
-    splay_tree->number_of_nodes = 0;
-    splay_tree->root            = NULL;
+    new_splay_tree->number_of_nodes = 0;
+    new_splay_tree->root            = NULL;
 
-    return splay_tree;
+    return new_splay_tree;
 }
 
 void SplayTreeDtor(SplayTree* splay_tree)
@@ -398,22 +500,94 @@ void SplayTreeDtor(SplayTree* splay_tree)
     free(splay_tree);
 }
 
-void SplayTreeSearch(SplayTree* splay_tree, key_t key)
+char* SplayTreeSearch(SplayTree* splay_tree, char* key)
 {
     assert((splay_tree != NULL) && "ERROR!!! Pointer to \'splay_tree\' is NULL!\n");
 
     Node* key_node = SubTreeSearch(splay_tree->root, key);
 
-    if (key_node != NULL && key_node->key == key)
+    if (key_node == NULL)
     {
-        return;
+        return NULL;
     }
+
+    splay_tree->root    = SubTreeSplay(key_node);
+    return key_node->key2;
 }
 
-void SplayTreeInsert(SplayTree* splay_tree, key_t key)
+void SplayTreeInsert(SplayTree* splay_tree, char* key1, char* key2)
 {
     assert((splay_tree != NULL) && "ERROR!!! Pointer to \'splay_tree\' is NULL!\n");
 
-    splay_tree->root             = SubTreeInsert(splay_tree->root, key);
-    splay_tree->number_of_nodes += 1;
+    splay_tree->root    = SubTreeInsert(splay_tree->root, key1, key2);
+    splay_tree->root    = SubTreeInsert(splay_tree->root, key2, key1);
+}
+
+static void NodeGraphDump(Node* node, FILE* dot_file)
+{
+    if (node == NULL)
+    {
+        return;
+    }
+
+    fprintf(dot_file, "\tnode_%p[label = \"%s | %s\"];\n", node, node->key1, node->key2);
+
+    NodeGraphDump(node->left_child,  dot_file);
+
+    NodeGraphDump(node->right_child, dot_file);
+}
+
+static void EdgeGraphDump(Node* node, FILE* dot_file)
+{
+    if (node->left_child != NULL)
+    {
+        fprintf(dot_file, "node_%p -> node_%p [color = \"#00FF41\", label = \"L\"];\n",
+                           node, node->left_child);
+
+        EdgeGraphDump(node->left_child, dot_file);
+    }
+
+    if (node->right_child != NULL)
+    {
+        fprintf(dot_file, "node_%p -> node_%p [color = \"#FF4001\", label = \"R\"];\n",
+                           node, node->right_child);
+
+        EdgeGraphDump(node->right_child, dot_file);
+    }
+}
+
+void Dump(SplayTree* splay_tree)
+{
+    assert((splay_tree != NULL) && "Pointer to tree is NULL!!!\n");
+
+    FILE* dot_file = NULL;
+
+    dot_file = fopen("tree.dot", "w");
+
+    //========================================================================================
+
+    fprintf(dot_file, "digraph G\n"
+                      "{\n"
+                      "\tgraph [dpi = 100];\n\n"
+                      "\trankdir = TB;\n\n"
+                      "\tedge[minlen = 3, arrowsize = 2, penwidth = 1.5];\n"
+                      "\tnode[shape = Mrecord, style = \"rounded, filled\", "
+                      "fillcolor = \"yellow\", fontsize = 20, "
+                      "penwidth = 3];\n\n");
+
+    //========================================================================================
+
+    NodeGraphDump(splay_tree->root, dot_file);
+    fprintf(dot_file, "\n");
+
+    EdgeGraphDump(splay_tree->root, dot_file);
+    fprintf(dot_file, "\n");
+
+    //========================================================================================
+
+    fprintf(dot_file, "}\n");
+
+    fclose(dot_file);
+
+    system("dot tree.dot -T png -o tree.png");
 }
