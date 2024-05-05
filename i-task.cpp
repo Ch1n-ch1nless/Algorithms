@@ -71,8 +71,6 @@ void        FindStormtroopersInSplayTree(SplayTree* splay_tree, size_t number);
 char**      KeyBufferBuild(size_t number_of_keys);
 void        KeyBufferDelete(char** key_buffer, size_t number_of_keys);
 
-void        Dump(SplayTree* splay_tree);
-
 /*============================================*/
 
 int main()
@@ -125,8 +123,6 @@ void AddStormtroopersToSplayTree( SplayTree* splay_tree, char** key_buffer, size
         }
 
         SplayTreeInsert(splay_tree, key_buffer[2*i], key_buffer[2*i+1]);
-
-        //Dump(splay_tree);
     }
 }
 
@@ -521,73 +517,4 @@ void SplayTreeInsert(SplayTree* splay_tree, char* key1, char* key2)
 
     splay_tree->root    = SubTreeInsert(splay_tree->root, key1, key2);
     splay_tree->root    = SubTreeInsert(splay_tree->root, key2, key1);
-}
-
-static void NodeGraphDump(Node* node, FILE* dot_file)
-{
-    if (node == NULL)
-    {
-        return;
-    }
-
-    fprintf(dot_file, "\tnode_%p[label = \"%s | %s\"];\n", node, node->key1, node->key2);
-
-    NodeGraphDump(node->left_child,  dot_file);
-
-    NodeGraphDump(node->right_child, dot_file);
-}
-
-static void EdgeGraphDump(Node* node, FILE* dot_file)
-{
-    if (node->left_child != NULL)
-    {
-        fprintf(dot_file, "node_%p -> node_%p [color = \"#00FF41\", label = \"L\"];\n",
-                           node, node->left_child);
-
-        EdgeGraphDump(node->left_child, dot_file);
-    }
-
-    if (node->right_child != NULL)
-    {
-        fprintf(dot_file, "node_%p -> node_%p [color = \"#FF4001\", label = \"R\"];\n",
-                           node, node->right_child);
-
-        EdgeGraphDump(node->right_child, dot_file);
-    }
-}
-
-void Dump(SplayTree* splay_tree)
-{
-    assert((splay_tree != NULL) && "Pointer to tree is NULL!!!\n");
-
-    FILE* dot_file = NULL;
-
-    dot_file = fopen("tree.dot", "w");
-
-    //========================================================================================
-
-    fprintf(dot_file, "digraph G\n"
-                      "{\n"
-                      "\tgraph [dpi = 100];\n\n"
-                      "\trankdir = TB;\n\n"
-                      "\tedge[minlen = 3, arrowsize = 2, penwidth = 1.5];\n"
-                      "\tnode[shape = Mrecord, style = \"rounded, filled\", "
-                      "fillcolor = \"yellow\", fontsize = 20, "
-                      "penwidth = 3];\n\n");
-
-    //========================================================================================
-
-    NodeGraphDump(splay_tree->root, dot_file);
-    fprintf(dot_file, "\n");
-
-    EdgeGraphDump(splay_tree->root, dot_file);
-    fprintf(dot_file, "\n");
-
-    //========================================================================================
-
-    fprintf(dot_file, "}\n");
-
-    fclose(dot_file);
-
-    system("dot tree.dot -T png -o tree.png");
 }
