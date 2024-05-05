@@ -19,6 +19,7 @@ typedef struct node_elem_t
 {
     long long   key;
     long long   priority;
+    long long   sum;
 } node_elem_t;
 
 typedef struct Node 
@@ -45,11 +46,12 @@ typedef struct NodePair
 Node*       NodeCtor(long long key);
 void        NodeDtor(Node* node);
 
+long long   GetSum(Node* node);
+void        UpdateSum(Node* node);
+
 void        SubTreeSplit(Node* old_subtree, int key, Node** left_subtree, Node** right_subtree);
 Node*       SubTreeMerge(Node* left_subtree, Node* right_subtree);
 void        SubTreeDtor(Node* subtree_root);
-
-long long   SubTreeGetSum(Node* subtree_root, long long l, long long r);
 
 Treap*      TreapCtor(void);
 void        TreapDtor(Treap* treap);
@@ -151,6 +153,7 @@ Node* NodeCtor(long long key)
 
     new_node->data.key      = key;
     new_node->data.priority = rand();
+    new_node->data.sum      = key;
     
     new_node->left  = NULL;
     new_node->right = NULL;
@@ -174,6 +177,19 @@ void NodeDtor(Node* node)
     free(node);
 }
 
+long long GetSum(Node* node)
+{
+    return (node == NULL) ? 0 : node->data.sum;
+}
+
+void UpdateSum(Node* node)
+{
+    if (node != NULL)
+    {
+        node->data.sum  = node->data.key + GetSum(node->left) + GetSum(node->right);
+    }
+}
+
 void SubTreeSplit(Node* old_subtree, int key, Node** left_subtree, Node** right_subtree)
 {
     assert((left_subtree  != NULL) && "ERROR!!! Pointer to \'left_subtree\'  is NULL!\n");
@@ -194,6 +210,9 @@ void SubTreeSplit(Node* old_subtree, int key, Node** left_subtree, Node** right_
         SubTreeSplit(old_subtree->left, key, left_subtree, &(old_subtree->left));
         *right_subtree = old_subtree;
     }
+
+    UpdateSum(*left_subtree);
+    UpdateSum(*right_subtree);
 }
 
 Node* SubTreeMerge(Node* left_subtree, Node* right_subtree)
@@ -206,11 +225,15 @@ Node* SubTreeMerge(Node* left_subtree, Node* right_subtree)
     if (left_subtree->data.priority > right_subtree->data.priority)
     {
         left_subtree->right = SubTreeMerge(left_subtree->right, right_subtree);
-        
+        UpdateSum(left_subtree);
+        UpdateSum(right_subtree);
+
         return left_subtree;
     }
 
     right_subtree->left = SubTreeMerge(left_subtree, right_subtree->left);
+    UpdateSum(right_subtree);
+    UpdateSum(left_subtree);
 
     return right_subtree;
 }
@@ -225,27 +248,6 @@ void SubTreeDtor(Node* subtree_root)
     SubTreeDtor(subtree_root->left);
     SubTreeDtor(subtree_root->right);
     NodeDtor(subtree_root);
-}
-
-long long SubTreeGetSum(Node* subtree_root, long long l, long long r)
-{
-    if (subtree_root == NULL)
-    {
-        return 0;
-    }
-
-    if (r < subtree_root->data.key)
-    {
-        return SubTreeGetSum(subtree_root->left, l, r);
-    }
-    else if (l > subtree_root->data.key)
-    {
-        return SubTreeGetSum(subtree_root->right, l, r);
-    }
-    else
-    {
-        return subtree_root->data.key + SubTreeGetSum(subtree_root->left, l, r) + SubTreeGetSum(subtree_root->right, l, r);
-    }
 }
 
 Treap* TreapCtor(void)
@@ -329,7 +331,18 @@ void TreapInsert(Treap* treap, long long key)
 
 long long TreapGetSum(Treap* treap, long long left, long long right)
 {
-    return SubTreeGetSum(treap->root, left, right);
+    Node*   left_subtree    = NULL; // subtree, in which all keys of nodes < left
+    Node*   sum_subtree     = NULL; // subtree, in which all keys of nodes \in [left, right]
+    Node*   right_subtree   = NULL; // subtree, in which all keys of nodes > right
+
+    SubTreeSplit(treap->root, right + 1, &sum_subtree,  &right_subtree);
+    SubTreeSplit(sum_subtree, left,      &left_subtree, &sum_subtree);
+
+    long long sum = GetSum(sum_subtree);
+
+    treap->root = SubTreeMerge(SubTreeMerge(left_subtree, sum_subtree), right_subtree);
+
+    return sum;
 }
 
 void TreapDelete(Treap* treap, long long key)
