@@ -18,12 +18,19 @@ const int       POISON_VALUE                = -525252;
 
 /*===================Structs==================*/
 
+/**
+ * @brief Структура, которая хранит в себе значение ключа и флаг, который показывает занята ли ячейка или нет
+*/
 typedef struct
 {
     int filled;
     int value;
 } elem_t;
 
+/**
+ * @struct HashData
+ * @brief  Структура, которая хранит коэффициенты для хеш-функции
+*/
 typedef struct HashData
 {
     size_t  a;
@@ -31,91 +38,124 @@ typedef struct HashData
     size_t  p;
 } HashData;
 
+/**
+ * @struct InternalHashTable
+ * @brief  Структура внутренней хеш-таблицы или хеш-таблицы 2-ого уровня
+*/
 typedef struct InternalHashTable
 {
-    HashData    coefficients;
-    size_t      size;
-    elem_t*     data;
+    HashData    coefficients;   //!< коэффициенты для хеш-функции
+    size_t      size;           //!< размер хеш-таблицы
+    elem_t*     data;           //!< массив элементов
 } InternalHashTable;
 
+/**
+ * @struct HashTable
+ * @brief  Структура внешней хеш-таблицы или хеш-таблицы 1-ого уровня
+*/
 typedef struct HashTable
 {
-    HashData            coefficients;
-    int                 size;
-    InternalHashTable*  data;
+    HashData            coefficients;   //!< коэффициенты для хеш-функции
+    int                 size;           //!< размер хеш-таблицы
+    InternalHashTable*  data;           //!< массива внутренних хеш-таблиц (хеш-таблиц 2-ого уровня)
 } HashTable;
 
+/**
+ * @struct DynamicArray
+ * @brief  Структура динамического массива
+*/
 typedef struct DynamicArray
 {
-    int*    data;
-    size_t  size;
-    size_t  capacity;
+    int*    data;       //!< массив целых чисел
+    size_t  size;       //!< количество элементов в массиве
+    size_t  capacity;   //!< максимальное количество элементов в массиве
 } DynamicArray;
 
-
+/**
+ * @struct SecondaryHashTable
+ * @brief  Структура вторичной хеш-таблицы
+*/
 typedef struct SecondaryHashTable
 {
-    DynamicArray*   data;
-    size_t          size;
+    DynamicArray*   data;   //!< массив динамических массивов
+    size_t          size;   //!< размер массива
 } SecondaryHashTable;
 
 /*==================Functions=================*/
 
+/**
+ * @brief Функция поиска минимальной степени 2-ки, которая больше некоторого числа
+ * 
+ * @param [in] number - число для которого нужно найти минимальную степень 2-ки, которая больше этого числа
+ * 
+ * @return нужная степень 2-ки
+*/
 int                 FindMinPowerOfTwo(int number);
 
+//-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+
+/**
+ * @brief Создаёт пустой динамический массив, у которого максимальный размер = capacity
+ * 
+ * @param [in] capacity - максимальный размер динамической таблицы
+ * 
+ * @param [out] array  - указатель на структуру DynamicArray
+*/
 void                DynamicArrayCtor(  DynamicArray* array, size_t capacity );
+
+/**
+ * @brief Уничтожает динамический массив
+ * 
+ * @param [in] array - указатель на динамический массив
+*/
 void                DynamicArrayDtor(  DynamicArray* array                  );
+
+/**
+ * @brief Вставляет элемент в динамический массив
+ * 
+ * @param [in] array - указатель на динамический массив
+ * 
+ * @param [in] key - ключ, который мы хотим вставить в динамический массив
+*/
 void                DynamicArrayInsert(DynamicArray* array, int    key      );
+
+//-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 
 SecondaryHashTable* SecondaryHashTableCtor(int* collisions_array, int* array, size_t array_size, size_t ht_size, HashData* hash_cf);
 void                SecondaryHashTableDtor(SecondaryHashTable* hash_table);
 
+//-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+
 int                 Hash(HashData* hash_coefficients, int key);
+
+//-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 
 int*                FindPerfectFirstHashFunction( HashData* hash_coefficients, int* array, size_t array_size, size_t ht_size);
 void                FindPerfectSecondHashFunction(HashData* hash_coefficients, int* array, size_t array_size);
 
+//-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+
 void                InternalHashTableCtor(InternalHashTable* hash_table, size_t size    );
 void                InternalHashTableDtor(InternalHashTable* hash_table                 );
+
+//-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 
 int                 InternalHashTableInsert(InternalHashTable* hash_table, int key);
 int                 InternalHashTableSearch(InternalHashTable* hash_table, int key);
 
+//-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+
 HashTable*          HashTableCtor(int* array, size_t array_size);
 void                HashTableDtor(HashTable* hash_table);
+
+//-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 
 int                 HashTableInsert(HashTable* hash_table, int key);
 int                 HashTableSearch(HashTable* hash_table, int key);
 
+//-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+
 void                FindKeysInHashTable(HashTable* hash_table);
-
-#define red(str)    "\033[31m"#str"\033[0m"
-#define green(str)  "\033[32m"#str"\033[0m"
-#define yellow(str) "\033[33m"#str"\033[0m"
-
-void Dump(struct HashTable* hash_table) {
-    if(!hash_table) {
-        printf("\nHash table is NULL\n");
-        return;
-    }
-    printf("\nHash table Dump:\n");
-    printf("Size: %d\n", hash_table->size);
-    printf("Hash Parameters: a=%d, b=%d, p=%d\n", hash_table->coefficients.a, hash_table->coefficients.b, hash_table->coefficients.p);
-    for(size_t i = 0; i < hash_table -> size; i++) {
-        printf(red(Bucket)" %lu:\n", i);
-        InternalHashTable* second_hash_table = hash_table->data + i;
-        if(!second_hash_table) {
-            printf("\tHash_Table is NULL\n");
-            continue;
-        }
-        printf("\tSize: %lu\n", second_hash_table -> size);
-        printf("\tHash Parameters: a=%d, b=%d, p=%d\n", second_hash_table->coefficients.a, second_hash_table->coefficients.b, second_hash_table->coefficients.p);
-        for(size_t j = 0; j < second_hash_table -> size; j++) {
-            printf(green(\tBucket)" %lu:\n", j);
-            printf("\t\tValue: %d\n", second_hash_table->data[j].value);
-        }
-    }
-}
 
 /*==============================================*/
 
@@ -143,8 +183,6 @@ int main()
     }
 
     HashTable* hash_table = HashTableCtor(array_of_keys, array_size);
-
-    //Dump(hash_table);
 
     FindKeysInHashTable(hash_table);
 
@@ -187,6 +225,8 @@ int FindMinPowerOfTwo(int number)
 
     return min_pow;
 }
+
+/*^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^*/
 
 /*v~~~~~~~~~~DynamicArray functions~~~~~~~~~~v*/
 
