@@ -1,4 +1,5 @@
 #include <assert.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -8,9 +9,6 @@
 
 const int       OK                          = 1;
 const int       ERROR                       = 0;
-
-const int       TRUE                        = 1;
-const int       FALSE                       = 0;
 
 const size_t    BIG_PRIME_NUMBER            = 1e9 + 7;
 
@@ -121,40 +119,161 @@ void                DynamicArrayInsert(DynamicArray* array, int    key      );
 
 //-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 
+/**
+ * @brief Создать вторичную хеш-таблицы, которая разделит массив array, на подмассивы
+ * 
+ * @param [in] collisions_array - массив коллизий
+ * 
+ * @param [in] array - массив ключей
+ * 
+ * @param [in] array_size - размер массива ключей
+ * 
+ * @param [in] ht_size - размер массива коллизий и размер хеш-таблицы 1-го уровня
+ * 
+ * @param [in] hash_cf - коэффициенты хеш-таблицы
+ * 
+ * @return указатель на вторичную хеш-таблицу
+*/
 SecondaryHashTable* SecondaryHashTableCtor(int* collisions_array, int* array, size_t array_size, size_t ht_size, HashData* hash_cf);
+
+/**
+ * @brief Удалить вторичную хеш-таблицу, занулить все данные и освободить память
+*/
 void                SecondaryHashTableDtor(SecondaryHashTable* hash_table);
 
 //-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 
+/**
+ * @brief Хеш-функция, которая по ключу возвращает определенный хеш
+ * 
+ * @param [in] hash_coefficients - указатель на структуру, которая хранит в себе коэффициенты хеш-таблицы
+ * 
+ * @param [in] key - ключ
+ * 
+ * @return хеш ключа
+*/
 int                 Hash(HashData* hash_coefficients, int key);
 
 //-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 
+/**
+ * @brief Функция, которая подбирает коэффициенты хеш-таблицы 1-го уровня
+ * 
+ * @param [in] hash_coefficients - указатель на структуру, которая хранит в себе коэффициенты хеш-таблицы
+ * 
+ * @param [in] array - массив ключей
+ * 
+ * @param [in] array_size - размер массива ключей
+ * 
+ * @param [in] ht_size - размер хеш-таблицы
+ * 
+ * @return указатель на массив коллизий, которые возникли в ходе подбора коэффициентов
+*/
 int*                FindPerfectFirstHashFunction( HashData* hash_coefficients, int* array, size_t array_size, size_t ht_size);
+
+/**
+ * @brief Функция, которая подбирает коэффициенты хеш-таблицы 2-го уровня
+ * 
+ * @param [in] hash_coefficients - указатель на структуру, которая хранит в себе коэффициенты хеш-таблицы
+ * 
+ * @param [in] array - массив ключей
+ * 
+ * @param [in] array_size - размер массива ключей
+*/
 void                FindPerfectSecondHashFunction(HashData* hash_coefficients, int* array, size_t array_size);
 
 //-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 
+/**
+ * @brief Функция, которая создаёт внутреннюю хеш-таблицу (хеш-таблицу 2-го уровня)
+ * 
+ * @param [in] hash_table - указатель на структуру хеш-таблицы
+ * 
+ * @param [in] size - размер хеш-таблицы
+*/
 void                InternalHashTableCtor(InternalHashTable* hash_table, size_t size    );
+
+/**
+ * @brief Функция, которая удаляет внутреннюю хеш-таблицу
+ * 
+ * @param [in] hash_table - указатель на структуру внутренней хеш-таблицы
+*/
 void                InternalHashTableDtor(InternalHashTable* hash_table                 );
 
-//-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 
+
+/**
+ * @brief Вставляет ключ во внутреннюю хеш-таблицу
+ * 
+ * @param [in] hash_table - указатель на внутреннюю хеш-таблицу
+ * 
+ * @param [in] key - ключ, который хотим вставить во внутреннюю хеш-таблицу
+ * 
+ * @return OK, если ключ был вставлен успешно, иначе ERROR
+*/
 int                 InternalHashTableInsert(InternalHashTable* hash_table, int key);
-int                 InternalHashTableSearch(InternalHashTable* hash_table, int key);
+
+/**
+ * @brief Ищет ключ во внутренней хеш-таблице
+ * 
+ * @param [in] hash_table - указатель на внутреннюю хеш-таблицу
+ * 
+ * @param [in] key - ключ, который хотим найти
+ * 
+ * @return true, если ключ нашелся, иначе false 
+*/
+bool                InternalHashTableSearch(InternalHashTable* hash_table, int key);
 
 //-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 
+/**
+ * @brief Функция, которая строит хеш-таблицу по массиву ключей
+ * 
+ * @param [in] array - указатель на массив ключей
+ * 
+ * @param [in] array_size - размер массива ключей
+ * 
+ * @return указатель на хеш-таблицу (хеш-таблицу 1-го уровня)
+*/
 HashTable*          HashTableCtor(int* array, size_t array_size);
+
+/**
+ * @brief Функция, которая удаляет структуру хеш-таблицы из памяти
+ * 
+ * @param [in] hash_table - указатель на хеш-таблицу (хеш-таблицу 1-го уроня)
+*/
 void                HashTableDtor(HashTable* hash_table);
 
-//-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 
+/**
+ * @brief Добавляет в хеш-таблицу ключ
+ * 
+ * @param [in] hash_table - указатель на хеш-таблицу
+ * 
+ * @param [in] key - ключ, который хотим вставить в хеш-таблицу
+ * 
+ * @return OK, если ключ был вставлен успешно, иначе ERROR
+*/
 int                 HashTableInsert(HashTable* hash_table, int key);
-int                 HashTableSearch(HashTable* hash_table, int key);
+
+/**
+ * @brief Ищет ключ в хеш-таблице (1-го уровня)
+ * 
+ * @param [in] hash_table - указатель на хеш-таблицу (1-го уровня)
+ * 
+ * @param [in] key - ключ, который хотим найти
+ * 
+ * @return true, если ключ нашелся, иначе false 
+*/
+bool                HashTableSearch(HashTable* hash_table, int key);
 
 //-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 
+/**
+ * @brief Читает ключи, которые вводит пользователь и ищет их в хеш-таблице, потом выводит результат поиска.
+ * 
+ * @param [in] hash_table - указатель на хеш-таблицу
+*/
 void                FindKeysInHashTable(HashTable* hash_table);
 
 /*==============================================*/
@@ -167,7 +286,7 @@ int main()
 
     if (scanf("%lu", &array_size) == 0)
     {
-        assert(FALSE && "ERROR!!! Program can not read the number!\n");
+        assert(false && "ERROR!!! Program can not read the number!\n");
     }
 
     int* array_of_keys = (int*) calloc(array_size, sizeof(int));
@@ -178,7 +297,7 @@ int main()
     {
         if (scanf("%d", array_of_keys + i) == 0)
         {
-            assert(FALSE && "ERROR!!! Program can not read the number!\n");
+            assert(false && "ERROR!!! Program can not read the number!\n");
         }
     }
 
@@ -201,7 +320,7 @@ void FindKeysInHashTable(HashTable* hash_table)
 
     while (scanf("%d", &key) != 0)
     {
-        if (HashTableSearch(hash_table, key) == TRUE)
+        if (HashTableSearch(hash_table, key) == true)
         {
             printf("YES\n");
         }
@@ -330,7 +449,7 @@ int* FindPerfectFirstHashFunction(HashData* hash_coefficients, int* array, size_
 
     HashData new_coefficients = {0, 0, 0};
 
-    while (TRUE)
+    while (true)
     {   
         while (new_coefficients.a == 0)
         {
@@ -382,7 +501,7 @@ void FindPerfectSecondHashFunction(HashData* hash_coefficients, int* array, size
 
     HashData new_coefficients = {0, 0, 0};
 
-    while (TRUE)
+    while (true)
     {   
         while (new_coefficients.a == 0)
         {
@@ -447,7 +566,7 @@ void InternalHashTableCtor(InternalHashTable* hash_table, size_t size)
 
     for (size_t i = 0; i < size; i++)
     {
-        hash_table->data[i].filled  = FALSE;
+        hash_table->data[i].filled  = false;
         hash_table->data[i].value   = POISON_VALUE;
     }
 }
@@ -482,35 +601,35 @@ int InternalHashTableInsert(InternalHashTable* hash_table, int key)
 
     size_t index = Hash(&hash_table->coefficients, key) % hash_table->size;
 
-    if (hash_table->data[index].filled == FALSE)
+    if (hash_table->data[index].filled == false)
     {
         hash_table->data[index].value   = key;
-        hash_table->data[index].filled  = TRUE;
+        hash_table->data[index].filled  = true;
         return OK;
     }
 
-    return FALSE;
+    return false;
 }
 
-int InternalHashTableSearch(InternalHashTable* hash_table, int key)
+bool InternalHashTableSearch(InternalHashTable* hash_table, int key)
 {
     assert((hash_table != NULL) && "ERROR!!! Pointer to \'hash_table\' is NULL!\n");
 
     size_t index = Hash(&hash_table->coefficients, key) % hash_table->size;
 
-    if (hash_table->data[index].filled == FALSE)
+    if (hash_table->data[index].filled == false)
     {
-        return FALSE;
+        return false;
     }
     else
     {
         if (hash_table->data[index].value == key)
         {
-            return TRUE;
+            return true;
         }
         else
         {
-            return FALSE;
+            return false;
         }
     }
 }
@@ -562,7 +681,7 @@ HashTable*  HashTableCtor(int* array, size_t array_size)
             {
                 for (size_t j = 0; j < hash_table->data[i].size; j++)
                 {
-                    hash_table->data[i].data[j].filled  = FALSE;
+                    hash_table->data[i].data[j].filled  = false;
                     hash_table->data[i].data[j].value   = POISON_VALUE;
                 }
             }
@@ -613,7 +732,7 @@ int HashTableInsert(HashTable* hash_table, int key)
     }
 }
 
-int HashTableSearch(HashTable* hash_table, int key)
+bool HashTableSearch(HashTable* hash_table, int key)
 {
     assert((hash_table != NULL) && "ERROR!!! Program can not allocate memory!\n");
 
@@ -621,7 +740,7 @@ int HashTableSearch(HashTable* hash_table, int key)
 
     if (hash_table->data[index].size == 0)
     {
-        return FALSE;
+        return false;
     }
     else
     {
