@@ -1,4 +1,5 @@
 #include <assert.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -8,61 +9,253 @@
 
 /*==================Constants=================*/
 
-const int   TRUE                =  1;
-const int   FALSE               =  0;
-
 const int   MODULE              =  1000000000;
 
 const int   KEY_IS_NOT_FOUND    = -1;    
 
 /*===================Structs==================*/
 
+/**
+ * @struct Node
+ * 
+ * @brief структура узла AVL-дерева
+*/
 typedef struct Node
 {
-    int             key;
-    size_t          height;
-    struct Node*    left;
-    struct Node*    right;
+    int             key;        //!<  ключ узла
+    size_t          height;     //!<  высота поддерева, которое имеет корень в этом узле  
+    struct Node*    left;       //!<  Указатель на корень левого поддерева
+    struct Node*    right;      //!<  Указатель на корень правого поддерева
 } Node;
 
+
+/**
+ * @struct AVLTree
+ * 
+ * @brief структура AVL дерева
+*/
 typedef struct AVLTree
-{
-    Node*   root;
-    size_t  size;
+{   
+    Node*   root;               //!< корень данного дерева
+    size_t  size;               //!< количество узлов в дереве
 } AVLTree;
 
 /*==================Functions=================*/
 
-//Node functions
+/**
+ * @brief Функция, которая создаёт узел дерева
+ * 
+ * @param [in] key - ключ, который будет в нем хранится
+ * 
+ * @return указатель на структуру узла
+*/
 Node*       NodeCtor(int key);
+
+/**
+ * @brief Функция, удаляющая узел из памяти
+ * 
+ * @param [in] node - указатель на структуру узла
+*/
 void        NodeDtor(Node* node);
 
-//AVL Tree functions
+//-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+
+/**
+ * @brief Функция, которая создаёт пустое AVL-дерево
+ * 
+ * @return указатель на структуру AVL-дерева
+*/
 AVLTree*    AVLTreeCtor(void);
+
+/**
+ * @brief Функция, удаляющая AVL-дерево из памяти
+ * 
+ * @param [in] avl_tree - указатель на структуру AVL-дерева
+*/
 void        AVLTreeDtor(AVLTree* avl_tree);
 
-int         AVLTreeSearch(AVLTree* avl_tree, int key);
+
+/**
+ * @brief Функция поиска ключа в AVL-дереве
+ * 
+ * @param [in] avl_tree - указатель на структуру AVL-дерева
+ * 
+ * @param [in] key - ключ, который хотим найти
+ * 
+ * @return true, если ключ найден, иначе false
+*/
+bool        AVLTreeSearch(AVLTree* avl_tree, int key);
+
+/**
+ * @brief Функция вставки ключа в AVL-дерево
+ * 
+ * @param [in] avl_tree - указатель на структуру AVL-дерева
+ * 
+ * @param [in] key - ключ, который хотим вставить
+*/
 void        AVLTreeInsert(AVLTree* avl_tree, int key);
+
+/**
+ * @brief Функция удаления ключа из AVL-дерева
+ * 
+ * @param [in] avl_tree - указатель на структуру AVL-дерева
+ * 
+ * @param [in] key - ключ, который хотим удалить
+*/
 void        AVLTreeDelete(AVLTree* avl_tree, int key);
 
-//Secondary functions
+//-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+
+/**
+ * @brief Функция удаления поддерева с корня
+ * 
+ * @param [in] root - указатель на корень поддерева
+*/
 void        SubTreeDtor(Node* root);
+
+/**
+ * @brief Функция вставки ключа в поддерево
+ * 
+ * @param [in] root - указатель на корень поддерева
+ * 
+ * @param [in] key - ключ, который хотим вставить
+ * 
+ * @return Указатель на корень поддерева с новым узлом
+*/
 Node*       SubTreeInsert(Node* root, int key);
+
+/**
+ * @brief Функция удаления ключа из поддерева
+ * 
+ * @param [in] root - указатель на корень поддерева
+ * 
+ * @param [in] key -  ключ, который хотим удалить
+ * 
+ * @return Указатель на корень поддерева без узла с ключом key
+*/
 Node*       SubTreeDelete(Node* root, int key);
 
+
+
+/**
+ * @brief Функция, которая возвращает высоту поддерева с корнем в текущем узле
+ * 
+ * @param [in] node - указатель на корень поддерева
+ * 
+ * @return высота поддерева
+*/
 size_t      Height(Node* node);
+
+/**
+ * @brief Функция пересчета высоты в корне поддерева
+ * 
+ * @param [in] node - указатель на корень поддерева
+*/
 void        FixHeight(Node* node);
+
+/**
+ * @brief Функция, которая считает баланс в поддереве
+ * 
+ * @param [in] node - указатель на корень поддерева
+ * 
+ * @return разницу в высотах между правым узлом и левым
+*/
 int         CalculateBalance(Node* node);
+
+/**
+ * @brief Разворот дерева 
+ * 
+ * P - parent
+ * X - правый ребенок
+ * 
+ *   P                     X
+ *  / \  <- rotate        / \
+ * A   X            =>   P   C
+ *    / \               / \  
+ *   B   C             A   B
+ * 
+ * @param [in] parent - указатель на узел, который хотим развернуть
+ * 
+ * @return указатель на X
+*/
 Node*       RotateLeft(Node* parent);
+
+/**
+ * @brief Разворот дерева:
+ * 
+ *  P - parent
+ *  X - левый ребенок           
+ *                     
+ *            P           X             
+ * rotate -> / \         / \   
+ *          X   C   =>  A   P           
+ *         / \             / \          
+ *        A   B           B   C         
+ * 
+ * @param [in] parent - 
+ * 
+ * @return указатель на X
+*/
 Node*       RotateRight(Node* parent);
+
+/**
+ * @brief Функция, которая подсчитывает баланс поддерева, и если он нарушен, то делает развороты
+ * 
+ * @param [in] subtree_root - указатель на корень поддерева
+ * 
+ * @return указатель на корень поддерева с исправленным балансом 
+*/
 Node*       FixBalanceInSubTree(Node* subtree_root);
 
+
+
+/**
+ * @brief Функция поиска максимального ключа в поддереве
+ * 
+ * @param [in] subtree_root - указатель на корень поддерева
+ * 
+ * @return указатель на узел с максимальным ключом
+*/
 Node*       FindMaxKeyInSubTree(Node* subtree_root);
+
+/**
+ * @brief Функция, которая открепляет узел с максимальным ключом из поддерева
+ * 
+ * @param [in] subtree_root - указатель на корень поддерева
+ * 
+ * @return корень поддерева без максимального ключа
+*/
 Node*       UnLinkMaxKeyInSubTree(Node* subtree_root);
 
-//Execute Commands
+//-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+
+/**
+ * @brief Функция, которая считывает команды пользователя и исполняет их
+ * 
+ * @param [in] avl_tree - указатель на AVL-дерево
+ * 
+ * @param [in] number_of_commands - количество команд пользователя
+*/
 void        ExecuteCommands(AVLTree* avl_tree, size_t number_of_commands);
+
+/**
+ * @brief Функция добавления ключа в дереве
+ * 
+ * @param [in] avl_tree - указатель на AVL-дерево
+ * 
+ * @param [in] key - ключ, который хотим вставить
+*/
 void        Add(AVLTree* avl_tree, int key);
+
+/**
+ * @brief Функция поиска наименьшего ключа в поддереве, который больше key
+ * 
+ * @param [in] node - указатель на корень поддерева
+ * 
+ * @param [in] key - ключ, относительного которого происходит поиска
+ * 
+ * @return наименьший ключ, который больше key
+*/
 int         Next(Node* node, int key);
 
 /*============================================*/
@@ -72,7 +265,7 @@ int main()
     size_t number_of_commands = 0;
     if (scanf("%lu", &number_of_commands) == 0)
     {
-        assert(FALSE && "Program can not read the number!\n");
+        assert(false && "Program can not read the number!\n");
     }
 
     AVLTree* avl_tree = AVLTreeCtor();
@@ -94,7 +287,7 @@ void ExecuteCommands(AVLTree* avl_tree, size_t number_of_commands)
     {
         if (scanf(" %c %d", &operation, &key) == 0)
         {
-            assert(FALSE && "Program can not read the request!\n");
+            assert(false && "Program can not read the request!\n");
         }
 
         switch (operation)
@@ -206,7 +399,7 @@ void AVLTreeDtor(AVLTree* avl_tree)
     free(avl_tree);
 }
 
-int AVLTreeSearch(AVLTree* avl_tree, int key)
+bool AVLTreeSearch(AVLTree* avl_tree, int key)
 {
     assert((avl_tree != NULL) && "Error! Pointer to \'avl_tree\' is NULL!!!\n");
 
@@ -228,7 +421,7 @@ int AVLTreeSearch(AVLTree* avl_tree, int key)
         }
     }
 
-    return (cur_node == NULL) ? FALSE : TRUE;
+    return (cur_node == NULL) ? false : true;
 }
 
 void AVLTreeInsert(AVLTree* avl_tree, int key)
@@ -309,11 +502,11 @@ Node* SubTreeDelete(Node* root, int key)
     }
     else if (root->key > key)
     {
-        root->left = SubTreeInsert(root->left, key);
+        root->left = SubTreeDelete(root->left, key);
     }
     else
     {
-        root->right = SubTreeInsert(root->right, key);
+        root->right = SubTreeDelete(root->right, key);
     }
 
     return FixBalanceInSubTree(root);
