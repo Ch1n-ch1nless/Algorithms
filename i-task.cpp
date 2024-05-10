@@ -1,4 +1,5 @@
 #include <assert.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -6,9 +7,6 @@
 /*==================Constants=================*/
 
 #define MAX_SIZE 1000
-
-const int       TRUE        = 1;
-const int       FALSE       = 0;
 
 /*===================Structs==================*/
 
@@ -31,44 +29,253 @@ typedef struct SplayTree
 
 //vv~~~~~~~~~~~~Secondary functions~~~~~~~~~~~vv
 
+/**
+ * @brief Функция, которая создаёт узел дерева с 2-мя ключами key1 и key2
+ * 
+ * @param [in] key1 - ключ, который попадёт в key1
+ * 
+ * @param [in] key2 - ключ, который попадёт в key2
+ * 
+ * @return узел, с 2-мя ключами
+*/
 Node*   NodeCtor(char* key1, char* key2);
+
+/**
+ * @brief Функция, которая удаляет узел дерева из памяти 
+ * 
+ * @param [in] node - узел, который надо удалить
+*/
 void    NodeDtor(Node* node);
 
+/**
+ * @brief Функция, которая возвращает указатель на узел родителя
+ * 
+ * @param [in] node - указатель на узел 
+ * 
+ * @return указатель на родителя узла
+*/
 Node*   GetParent(     Node* node);
+
+/**
+ * @brief Функция, которая возвращает указатель на дедушку (родителя родителя) узла 
+ * 
+ * @param [in] node - указатель на узел 
+ * 
+ * @return указатель на дедушку (родителя родителя) узла
+*/
 Node*   GetGrandParent(Node* node);
 
-int     IsLeftChild( Node* node);
-int     IsRightChild(Node* node);
+/**
+ * @brief Функция, которая проверяет, является ли текущий узел левым ребенком родителя узла
+ * 
+ * @param [in] node - указатель на узел
+ * 
+ * @return true, если узел - это левый ребенок родителя, иначе false
+*/
+bool    IsLeftChild( Node* node);
 
+/**
+ * @brief Функция, которая проверяет, является ли текущий узел правым ребенком родителя узла
+ * 
+ * @param [in] node - указатель на узел
+ * 
+ * @return true, если узел - это правый ребенок родителя, иначе false
+*/
+bool    IsRightChild(Node* node);
+
+/**
+ * @brief Разворот дерева:
+ * 
+ *  P - parent
+ *  X - левый ребенок           
+ *                     
+ *            P           X             
+ * rotate -> / \         / \   
+ *          X   C   =>  A   P           
+ *         / \             / \          
+ *        A   B           B   C
+ * 
+ * @param [in] parent - узел родителя
+*/
 void    RotateRight(Node* parent);
+
+/**
+ * @brief Разворот дерева:
+ * 
+ * P - parent
+ * X - правый ребенок
+ * 
+ *   P                     X
+ *  / \  <- rotate        / \
+ * A   X            =>   P   C
+ *    / \               / \  
+ *   B   C             A   B
+ * 
+ * @param [in] parent - узел родителя
+*/
 void    RotateLeft( Node* parent);
 
+/**
+ * @brief Функция делает следующее действие:
+ *                  
+ *            Y            X             
+ * rotate -> / \          / \ <- rotate  
+ *          X   C   <=>  A   Y           
+ *         / \              / \          
+ *        A   B            B   C  
+ * 
+ * @param [in] node - указатель на узел X       
+*/
 void    Zig(   Node* node);
+
+/**
+ * @brief Функция делают следующие действия:
+ * 
+ *                   1)                    2)                
+ *             Z                  Y                 X        
+ * rotate ->  / \    rotate ->  /   \       =>     / \       
+ *           Y   D     =>      X     Z            A   Y      
+ *          / \               / \   /  \             / \     
+ *         X   C             A   B C    D           B   Z    
+ *        / \                                          / \   
+ *       A   B         <=                   <=        C   D
+ * 
+ * @param [in] node - указатель на узел X  
+*/
 void    ZigZig(Node* node);
+
+/**
+ * @brief Функция делает следующие действия:
+ * 
+ *               1)                    2)                    
+ *       Z                    Z                   X          
+ *      / \       rotate ->  / \                /   \        
+ *     Y   D                X   D      =>      Y     Z       
+ *    / \  <- rotate       / \                / \   / \      
+ *   A   X                Y   C              A   B C   D     
+ *      / \      =>      / \                                 
+ *     B   C            A   B    
+ * 
+ * @param [in] node - указатель на узел X                            
+*/
 void    ZigZag(Node* node);
 
+/**
+ * @brief Функция, которая текущий узел возвращает в корень дерева
+ * 
+ * @param [in] root - указатель на новый корень дерева
+*/
 Node*   SubTreeSplay( Node* root);
 
+/**
+ * @brief Функция, которая в поддереве ищет ключ key
+ * 
+ * @param [in] root - указатель на корень поддерева
+ * 
+ * @param [in] key - ключ, по которому происходит поиск
+ * 
+ * @return указатель на узел, который содержит key
+*/
 Node*   SubTreeSearch(Node* root, char* key);
+
+/**
+ * @brief Функция, которая вставляет узел в поддерево
+ * 
+ * @param [in] root - указатель на корень поддерева
+ * 
+ * @param [in] key1 - ключ под номером 1
+ * 
+ * @param [in] key2 - ключ под номером 2
+ * 
+ * @return указатель на корень поддерева с добавленным узлом
+*/
 Node*   SubTreeInsert(Node* root, char* key1, char* key2);
+
+/**
+ * @brief Функция, которая удаляет поддерево
+ * 
+ * @param [in] root - указатель на корень поддерева 
+*/
 void    SubTreeDtor(  Node* root);
 
 //^^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
 
 //vv~~~~~~~~~~~~SplayTree functions~~~~~~~~~~~vv
 
+/**
+ * @brief Функция, которая создаёт splay-дерево
+ * 
+ * @return указатель на структуру splay-дерева
+*/
 SplayTree*  SplayTreeCtor(void);
+
+/**
+ * @brief Функция, которая удаляет splay-дерево
+ * 
+ * @param [in] splay_tree - указатель на splay-дерево
+*/
 void        SplayTreeDtor(SplayTree* splay_tree);
 
+/**
+ * @brief Функция, которая ищет в splay-дереве узел с ключом key и возвращает его второй ключ
+ * 
+ * @param [in] splay_tree - указатель на splay-дерево
+ * 
+ * @param [in] key - ключ, по которому происходит поиск
+ * 
+ * @return второй ключ в искомом узел
+*/
 char*       SplayTreeSearch(SplayTree* splay_tree, char* key);
+
+/**
+ * @brief Функция, которая добавляет в splay-дерево узел с парой ключей (key1, key2)
+ * 
+ * @param [in] splay_tree - указатель на splay-дерево
+ * 
+ * @param [in] key1 - ключ под номером 1
+ * 
+ * @param [in] key2 - ключ под номером 2
+*/
 void        SplayTreeInsert(SplayTree* splay_tree, char* key1, char* key2);
 
 //^^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
 
+/**
+ * @brief Функция, которая читает массив ключей и вставляет его в splay-дерево 
+ * 
+ * @param [in] splay_tree - указатель на splay-дерево
+ * 
+ * @param [in] key_buffer - массив ключей
+ * 
+ * @param [in] number - количество ключей в массиве
+*/
 void        AddStormtroopersToSplayTree( SplayTree* splay_tree, char** key_buffer, size_t number);
+
+/**
+ * @brief Функция, которая читает ключи, введенные пользователем и ищет их в splay-дереве
+ * 
+ * @param [in] splay_tree - указатель на splay-дерево
+ * 
+ * @param [in] number - число запросов
+*/
 void        FindStormtroopersInSplayTree(SplayTree* splay_tree, size_t number);
 
+/**
+ * @brief Функция, которая создаёт массив ключей размером number_of_keys
+ * 
+ * @param [in] number_of_keys - размер массива ключей
+ * 
+ * @return указатель на массив ключей
+*/
 char**      KeyBufferBuild(size_t number_of_keys);
+
+/**
+ * @brief Функция, которая удаляет массив ключей из памяти
+ * 
+ * @param [in] key_buffer - указатель на массив ключей
+ * 
+ * @param [in] number_of_keys - размер массива ключей
+*/
 void        KeyBufferDelete(char** key_buffer, size_t number_of_keys);
 
 /*============================================*/
@@ -80,7 +287,7 @@ int main()
 
     if (scanf("%lu", &N) == 0)
     {
-        assert(FALSE && "ERROR!!! Program can not read the number!\n");
+        assert(false && "ERROR!!! Program can not read the number!\n");
     }
 
     SplayTree* splay_tree = SplayTreeCtor();
@@ -91,7 +298,7 @@ int main()
 
     if (scanf("%lu", &Q) == 0)
     {
-        assert(FALSE && "ERROR!!! Program can not read the number!\n");
+        assert(false && "ERROR!!! Program can not read the number!\n");
     }
 
     FindStormtroopersInSplayTree(splay_tree, Q);
@@ -114,12 +321,12 @@ void AddStormtroopersToSplayTree( SplayTree* splay_tree, char** key_buffer, size
     {
         if (scanf("%999s", key_buffer[2*i]) == 0)
         {
-            assert(FALSE && "ERROR!!! Program can not read the string!\n");
+            assert(false && "ERROR!!! Program can not read the string!\n");
         }
 
         if (scanf("%999s", key_buffer[2*i+1]) == 0)
         {
-            assert(FALSE && "ERROR!!! Program can not read the string!\n");
+            assert(false && "ERROR!!! Program can not read the string!\n");
         }
 
         SplayTreeInsert(splay_tree, key_buffer[2*i], key_buffer[2*i+1]);
@@ -137,14 +344,14 @@ void FindStormtroopersInSplayTree(SplayTree* splay_tree, size_t number)
     {
         if (scanf("%999s", key) == 0)
         {
-            assert(FALSE && "ERROR!!! Program can not read the string!\n");
+            assert(false && "ERROR!!! Program can not read the string!\n");
         }
 
         answer = SplayTreeSearch(splay_tree, key);
 
         if (answer == NULL)
         {
-            assert(FALSE && "ERROR!!! Program can not find the key in splay_tree");
+            assert(false && "ERROR!!! Program can not find the key in splay_tree");
         }
         else
         {
@@ -237,30 +444,30 @@ Node* GetGrandParent(Node* node)
     return NULL;
 }
 
-int IsLeftChild( Node* node)
+bool IsLeftChild( Node* node)
 {
     assert((node         != NULL) && "ERROR!!! Pointer to \'node\'         is NULL!\n");
     assert((node->parent != NULL) && "ERROR!!! Pointer to \'node->parent\' is NULL!\n");
 
     if (node == node->parent->left_child)
     {
-        return TRUE;
+        return true;
     }
 
-    return FALSE;
+    return false;
 }
 
-int IsRightChild(Node* node)
+bool IsRightChild(Node* node)
 {
     assert((node         != NULL) && "ERROR!!! Pointer to \'node\'         is NULL!\n");
     assert((node->parent != NULL) && "ERROR!!! Pointer to \'node->parent\' is NULL!\n");
 
     if (node == node->parent->right_child)
     {
-        return TRUE;
+        return true;
     }
 
-    return FALSE;
+    return false;
 }
 
 void RotateRight(Node* parent)
@@ -427,19 +634,19 @@ Node* SubTreeInsert(Node* root, char* key1, char* key2)
     Node* prev      = NULL;
     Node* next      = NULL;
 
-    int   is_left   = FALSE;
+    int   is_left   = false;
 
     while (root != NULL)
     {
         if (strncmp(key1, root->key1, MAX_SIZE) <= 0)
         {
             next    = root->left_child;
-            is_left = TRUE;
+            is_left = true;
         }
         else
         {
             next    = root->right_child;
-            is_left = FALSE;
+            is_left = false;
         }
 
         prev = root;
