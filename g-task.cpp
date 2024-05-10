@@ -1,13 +1,11 @@
 #include <assert.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
 
 /*==================Constants=================*/
-
-const int           TRUE                =  1;
-const int           FALSE               =  0;
 
 const size_t        MAX_SIZE_OF_COMMAND =  7;
 
@@ -52,31 +50,196 @@ typedef struct NodePair
 
 /*==================Functions=================*/
 
+/**
+ * @brief Создание узла дерева с ключом key
+ * 
+ * @param [in] key - ключ, который будет в узле
+ * 
+ * @return указатель на структуру узла
+*/
 Node*   NodeCtor(int key);
+
+/**
+ * @brief Удаление узла дерева
+ * 
+ * @param [in] node - указатель на структуру узла дерева
+*/
 void    NodeDtor(Node* node);
 
+//-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+
+/**
+ * @brief Функция, которая возвращает размер поддерева с корнем в данном узле
+ * 
+ * @param [in] node - указатель на корень поддерева
+ * 
+ * @return размер поддерева
+*/
 int     GetSize(Node* node);
+
+/**
+ * @brief Функция, которая обновляет размер поддерева с корнем в данном узле
+ * 
+ * @param [in] node - указатель на корень поддерева
+*/
 void    UpdateSize(Node* node);
 
+//-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+
+/**
+ * @brief Функция, которая делит дерево на 2 поддерева, в одном из них все ключи в узлах < key, а в другом >= key
+ * 
+ * @param [in] old_subtree - указатель на дерево, которое будет разделено на 2
+ * 
+ * @param [in] key - ключ, относительного которого будет разделение
+ * 
+ * @param [out] left_subtree - указатель на поддерево, в котором ключи всех узлов < key
+ * 
+ * @param [out] right_subtree - указатель на поддерево, в котором ключи всех узлов >= key
+*/
 void    SubTreeSplit(Node* old_subtree, int key, Node** left_subtree, Node** right_subtree);
+
+/**
+ * @brief Объединение 2-ух поддеревьев, в одном поддереве все ключи < key, а в другом все ключи >= key
+ * 
+ * @param [in] left_subtree - указатель на корень поддерева, в котором все ключи < key
+ * 
+ * @param [in] right_subtree - указатель на корень поддерева, в котором все ключи >= key
+ * 
+ * @return указатель на объединенное дерево
+*/
 Node*   SubTreeMerge(Node* left_subtree, Node* right_subtree);
+
+/**
+ * @brief Функция, которая удаляет поддерево из памяти
+ * 
+ * @param [in] subtree_root - указатель на корень поддерева
+*/
 void    SubTreeDtor(Node* subtree_root);
 
+//-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+
+/**
+ * @brief Функция поиска в поддерева наименьшего ключа, который > key
+ * 
+ * @param [in] node - указатель на корень поддерева
+ * 
+ * @param [in] key - ключ, относительного которого происходит поиск
+ * 
+ * @return указатель на узел, в котором наименьший ключ, который > key 
+*/
 Node*   SubTreeFindNext(Node* node, int key);
+
+/**
+ * @brief Функция поиска в поддерева наибольшего ключа, который < key
+ * 
+ * @param [in] node - указатель на корень поддерева
+ * 
+ * @param [in] key - ключ, относительного которого происходит поиск
+ * 
+ * @return указатель на узел, в котором наибольший ключ, который < key 
+*/
 Node*   SubTreeFindPrev(Node* node, int key);
+
+/**
+ * @brief Функция, которая ищет в поддереве k-ую порядковую статистику
+ * 
+ * @param [in] node - указатель на корень поддерева
+ * 
+ * @param [in] k - номер порядковой статистики
+ * 
+ * @return указатель на узел, который содержит в себе k-ую порядковую статистику
+*/
 Node*   SubTreeFindKthStatistics(Node* node, int k);
 
+//-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+
+/**
+ * @brief Функция, которая создает декартово дерево
+ * 
+ * @return указатель на структуру декартова дерева
+*/
 Treap*  TreapCtor(void);
+
+/**
+ * @brief Функция, которая удаляет декартово дерево из памяти
+ * 
+ * @param [in] treap - указатель на структуру декартова дерева
+*/
 void    TreapDtor(Treap* treap);
 
-int     TreapFind(Treap* treap, int key);
+//-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+
+/**
+ * @brief Функция поиска ключа в декартовом дереве
+ * 
+ * @param [in] treap - указатель на декартово дерево
+ * 
+ * @param [in] key - ключ, который хотим найти
+ * 
+ * @return true, если ключ найдем, иначе false
+*/
+bool    TreapFind(Treap* treap, int key);
+
+/**
+ * @brief Функция вставки ключа в декартово дерево
+ * 
+ * @param [in] treap - указатель на декартово дерево
+ * 
+ * @param [in] key - ключ, который надо вставить
+*/
 void    TreapInsert(Treap* treap, int key);
+
+/**
+ * @brief Функция удаления узла с ключом key из декартова дерева
+ * 
+ * @param [in] treap - указатель на декартово дерево
+ * 
+ * @param [in] key - ключ, который надо удалить
+*/
 void    TreapDelete(Treap* treap, int key);
 
+
+/**
+ * @brief Функция поиска в декартовом дереве наименьшего ключа, который больше key
+ * 
+ * @param [in] treap - указатель на декартово дерево
+ * 
+ * @param [in] key - ключ, относительного которого сравниваем
+ * 
+ * @return наименьший ключ, который больше key
+*/
 int     TreapFindNext(Treap* treap, int key);
+
+/**
+ * @brief Функция поиска в декартовом дереве наибольшего ключа, который меньше key
+ * 
+ * @param [in] treap - указатель на декартово дерево
+ * 
+ * @param [in] key - ключ, относительного которого сравниваем
+ * 
+ * @return наибольший ключ, который меньше key
+*/
 int     TreapFindPrev(Treap* treap, int key);
+
+/**
+ * @brief Функция, которая ищет в декартовом дереве k-ую порядковую статистику
+ * 
+ * @param [in] node - указатель на декартово дерево
+ * 
+ * @param [in] k - номер порядковой статистики
+ * 
+ * @return k-ая порядковая статистика
+*/
 int     TreapFindKthStatistics(Treap* treap, int k);
 
+//-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+
+/**
+ * @brief Функция, которая читает команды пользователя и исполняет их
+ * 
+ * @param [in] treap - указатель на декартово дерево
+*/
 void    ExecuteCommands(Treap* treap);
 
 /*============================================*/
@@ -112,7 +275,7 @@ void ExecuteCommands(Treap* treap)
         }
         else if (strcmp(command, EXISTS_COMMAND) == 0)
         {
-            if (TreapFind(treap, argument) == TRUE)
+            if (TreapFind(treap, argument) == true)
             {
                 printf("true\n");
             }
@@ -137,7 +300,7 @@ void ExecuteCommands(Treap* treap)
             }
             else
             {
-                assert(FALSE && "User entered an invalid command!\n");
+                assert(false && "User entered an invalid command!\n");
             }
 
             if (answer == POISON_VALUE)
@@ -345,7 +508,7 @@ void TreapDtor(Treap* treap)
     free(treap);
 }
 
-int TreapFind(Treap* treap, int key)
+bool TreapFind(Treap* treap, int key)
 {
     assert((treap != NULL) && "ERROR!!! Pointer to \'treap\' is NULL!\n");
 
@@ -367,7 +530,7 @@ int TreapFind(Treap* treap, int key)
         }
     }
 
-    return (key_node != NULL) ? TRUE : FALSE;
+    return (key_node != NULL) ? true : false;
 }
 
 void TreapInsert(Treap* treap, int key)
@@ -384,7 +547,7 @@ void TreapInsert(Treap* treap, int key)
         return;
     }
 
-    if (TreapFind(treap, key) == FALSE)
+    if (TreapFind(treap, key) == false)
     {
         Node* left_tree  = NULL;
         Node* right_tree = NULL;
@@ -407,7 +570,7 @@ void TreapDelete(Treap* treap, int key)
 
     treap->number_of_nodes -= 1;
 
-    if (TreapFind(treap, key) == TRUE)
+    if (TreapFind(treap, key) == true)
     {
         Node* left_tree  = NULL;
         Node* right_tree = NULL;
