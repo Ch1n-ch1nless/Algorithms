@@ -8,7 +8,11 @@ class Vector {
  public:
   long long data[5];
 
-  Vector() : data() {}
+  Vector() : data() {
+    for (int i = 0; i < 5; ++i) {
+      data[i] = 0;
+    }
+  }
    
   ~Vector() = default;
 
@@ -38,7 +42,13 @@ class Matrix {
     }
   }
 
-  Matrix() : data() {}
+  Matrix() : data() {
+    for (int i = 0; i < 5; ++i) {
+      for (int j = 0; j < 5; ++j) {
+        data[i][j] = 0;
+      }
+    }
+  }
 
   ~Matrix() = default;
 
@@ -82,6 +92,9 @@ Vector operator*(const Matrix& matrix, const Vector& vector) {
   Vector result = {};
 
   for (int i = 0; i < 5; ++i) {
+    
+    result.data[i] = 0;
+
     for (int j = 0; j < 5; ++j) {
       result.data[i] += (vector.data[j] * matrix.data[i][j]) % MODULE;
       result.data[i] %= MODULE;
