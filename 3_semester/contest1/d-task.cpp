@@ -19,10 +19,6 @@ int BinarySearch(long long* array, int len, long long value) {
         } else {
             begin = middle;
         }
-
-        printf("|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|\n");
-        printf(" begin := %d\n   end := %d\nmiddle := %d\n", begin, end, middle);
-        printf("|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|\n");
     }
 
     if (array[begin] >= array[end]) {
@@ -46,36 +42,14 @@ void FindGNIS(long long* array, int n, std::vector<int>& answer) {
 
     for (int i = 0; i < n; i++) {
         
-        printf("=======================\n");
-        printf("\ta[%d] := %lld\n", i, array[i]);
-        
         int j = BinarySearch(dp, n, array[i]);
-        
-        printf("\tStart: search j := ");
-        printf("%d\n", j);
 
         if (dp[j-1] > array[i]  && array[i] > dp[j]) {
-            printf("We have change dp!\n");
-            printf("Now is dp[j] := array[i]\n");
             dp[j] = array[i];
             pos[j] = i;
             prev[i] = pos[j - 1];
             length = std::max(length, j);
         }
-
-        printf("\n-----------------------\n");
-        printf("dp = { ");
-        for (int i = 0; i <= n; i++) {
-            if (dp[i] == -POISON_VALUE) {
-                printf("-INF, ");
-            } else if (dp[i] == POISON_VALUE) {
-                printf("INF, ");
-            } else {
-                printf("%lld, ", dp[i]);
-            }
-        }
-        printf("}");
-        printf("\n-----------------------\n\n");
     }
 
     int current_pos = pos[length];
