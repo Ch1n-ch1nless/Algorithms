@@ -2,11 +2,11 @@
 #include <cmath>
 #include <cstdio>
 
-const long long MODULE = 1000003;
+const unsigned long long MODULE = 1000003;
 
 class Vector {
  public:
-  long long data[5];
+  unsigned long long data[5];
 
   Vector() : data() {
     for (int i = 0; i < 5; ++i) {
@@ -31,10 +31,10 @@ void Vector::CalculateFirstSteps() {
 
 class Matrix {
  private:
-  long long data[5][5];
+  unsigned long long data[5][5];
 
  public:
-  Matrix(long long new_data[5][5]) : data() {
+  Matrix(unsigned long long new_data[5][5]) : data() {
     for (int i = 0; i < 5; ++i) {
       for (int j = 0; j < 5; ++j) {
         data[i][j] = new_data[i][j];
@@ -104,7 +104,7 @@ Vector operator*(const Matrix& matrix, const Vector& vector) {
   return result;
 }
 
-Matrix BinPow(const Matrix& src, long long pow) {
+Matrix BinPow(const Matrix& src, unsigned long long pow) {
   if (pow == 1) return src;
 
   Matrix result = BinPow(src, pow / 2);
@@ -118,10 +118,10 @@ Matrix BinPow(const Matrix& src, long long pow) {
 }
 
 int main() {
-  long long number_of_moves = 0;
-  long long answer          = 0;
+  unsigned long long number_of_moves = 0;
+  unsigned long long answer          = 0;
  
-  if (!scanf("%lld", &number_of_moves)) {
+  if (!scanf("%llu", &number_of_moves)) {
     assert(false && "ERROR!!! Program can not read the number!\n");
   }
 
@@ -141,7 +141,7 @@ int main() {
     answer = grasshopper_moves.data[4];
   }
 
-  printf("%lld\n", answer);
+  printf("%llu\n", answer);
 
   return 0;
 }
