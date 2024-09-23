@@ -5,23 +5,23 @@
 class DynamicArray
 {
  private:
-  std::size_t n_    = 0;
-  std::size_t m_    = 0; 
-  int**       data_ = nullptr;
+  int   n_    = 0;
+  int   m_    = 0; 
+  int** data_ = nullptr;
 
  public:
-  DynamicArray  (std::size_t n, std::size_t m);
+  DynamicArray  (int n, int m);
   ~DynamicArray ();
 
-  int* operator [](std::size_t i);
+  int* operator [](int i);
 
   void Clear();
 };
 
-DynamicArray::DynamicArray(std::size_t n, std::size_t m) : n_(n), m_(m), data_(nullptr)  {
+DynamicArray::DynamicArray(int n, int m) : n_(n), m_(m), data_(nullptr)  {
   data_ = new int*[n_];
 
-  for (std::size_t i = 0; i < n_; ++i) {
+  for (int i = 0; i < n_; ++i) {
     data_[i] = new int[m_];
   }  
 
@@ -29,20 +29,20 @@ DynamicArray::DynamicArray(std::size_t n, std::size_t m) : n_(n), m_(m), data_(n
 }
 
 DynamicArray::~DynamicArray() {
-  for (std::size_t i = 0; i < n_; ++i) {
+  for (int i = 0; i < n_; ++i) {
     delete[] data_[i];
   }
 
   delete[] data_;
 }
 
-int* DynamicArray::operator[](std::size_t i) {
+int* DynamicArray::operator[](int i) {
   return data_[i];
 }
 
 void DynamicArray::Clear() {
-  for (std::size_t i = 0; i < n_; ++i) {
-    for (std::size_t j = 0; j < m_; ++j) {
+  for (int i = 0; i < n_; ++i) {
+    for (int j = 0; j < m_; ++j) {
       data_[i][j] = 0;
     }
   }
@@ -54,17 +54,17 @@ bool Compare(int sign, int elem1, int elem2) {
 
 void FindLargestAlternatingSequence(const std::vector<int>& src_seq,
                                           std::vector<int>& res_seq) {
-  std::size_t n     = src_seq.size();
-  std::size_t low   = 0;
-  std::size_t great = 1;
+  int n     = src_seq.size();
+  int low   = 0;
+  int great = 1;
 
   DynamicArray dp(n, 2);
 
   dp[0][low]   = 1;
   dp[0][great] = 1;
 
-  for (std::size_t i = 0; i < n; ++i) {
-    for (std::size_t j = 0; j < i; ++j) {
+  for (int i = 1; i < n; ++i) {
+    for (int j = 0; j < i; ++j) {
       if (src_seq[i] < src_seq[j]) {
         dp[i][low] = std::max(dp[i][low], dp[j][great] + 1);
       } else if (src_seq[i] > src_seq[j]) {
@@ -73,63 +73,66 @@ void FindLargestAlternatingSequence(const std::vector<int>& src_seq,
     }
   }
 
-  std::size_t max_len  = 0;
-  std::size_t pos      = 0;
-  int         sign     = 0;
+  int max_len  = 0;
+  int pos      = 0;
+  int sign     = 0;
 
-  for (std::size_t i = 0; i < n; ++i) {
+  for (int i = 0; i < n; ++i) {
     if (dp[i][great] > max_len) {
       max_len  = dp[i][great];
       sign     = great;
-      pos = i;
+      pos      = i;
     }
     if (dp[i][low] > max_len) {
       max_len  = dp[i][low];
       sign     = low;
-      pos = i;
+      pos      = i;
     }
   }
 
   res_seq.push_back(src_seq[pos]);
+  
+  int cur_elem = src_seq[pos];
 
   while (max_len > 1) {
     --max_len;
     sign = 1 - sign;
     --pos;
 
-    while (dp[pos][sign] != max_len || !Compare(sign, src_seq[pos], src_seq[max_len])) {
+    while (dp[pos][sign] != max_len || !Compare(sign, src_seq[pos], cur_elem)) {
       --pos;
     }
 
     res_seq.push_back(src_seq[pos]);
+    cur_elem = src_seq[pos];
   }
 
   std::reverse(res_seq.begin(), res_seq.end());
 }
 
-void ReadVector(std::vector<int>& vec, std::size_t vec_len) {
+void ReadVector(std::vector<int>& vec, int vec_len) {
   int temp_var = 0;
 
-  for (std::size_t i = 0; i < vec_len; ++i) {
+  for (int i = 0; i < vec_len; ++i) {
     std::cin >> temp_var;
     vec.push_back(temp_var);
   }
 }
 
-void PrintVector(const std::vector<int>& vec, std::size_t vec_len) {
+void PrintVector(const std::vector<int>& vec, int vec_len) {
   std::cout << vec_len << '\n';
 
-  for (std::size_t i = 0; i < vec_len; ++i) {
+  for (int i = 0; i < vec_len; ++i) {
     std::cout << vec[i] << ' ';
   }
 }
 
 int main() {
-  std::size_t number_of_regions = 0;
+  int number_of_regions = 0;
   std::cin >> number_of_regions;
 
-  std::vector<int> gangster_sequence = {};
-  std::vector<int> answer_sequence   = {};
+  std::vector<int> gangster_sequence;
+  std::vector<int> answer_sequence;
 
   ReadVector(gangster_sequence, number_of_regions);
 
