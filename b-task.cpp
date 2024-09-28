@@ -13,7 +13,7 @@ class Vector {
       data[i] = 0;
     }
   }
-   
+
   ~Vector() = default;
 
   void CalculateFirstSteps();
@@ -21,7 +21,7 @@ class Vector {
 
 void Vector::CalculateFirstSteps() {
   data[0] = 1;
-  
+
   for (int step = 1; step < 5; ++step) {
     for (int i = 1; i <= step; ++i) {
       data[step] += data[step - i];
@@ -75,11 +75,11 @@ Matrix operator*(const Matrix& left, const Matrix& right) {
 
   for (int left_index = 0; left_index < 5; ++left_index) {
     for (int right_index = 0; right_index < 5; ++right_index) {
-      
       result.data[left_index][right_index] = 0;
 
       for (int i = 0; i < 5; ++i) {
-        result.data[left_index][right_index] += (left.data[left_index][i] * right.data[i][right_index]) % MODULE;
+        result.data[left_index][right_index] +=
+            (left.data[left_index][i] * right.data[i][right_index]) % MODULE;
         result.data[left_index][right_index] %= MODULE;
       }
     }
@@ -92,7 +92,6 @@ Vector operator*(const Matrix& matrix, const Vector& vector) {
   Vector result = {};
 
   for (int i = 0; i < 5; ++i) {
-    
     result.data[i] = 0;
 
     for (int j = 0; j < 5; ++j) {
@@ -119,8 +118,8 @@ Matrix BinPow(const Matrix& src, unsigned long long pow) {
 
 int main() {
   unsigned long long number_of_moves = 0;
-  unsigned long long answer          = 0;
- 
+  unsigned long long answer = 0;
+
   if (!scanf("%llu", &number_of_moves)) {
     assert(false && "ERROR!!! Program can not read the number!\n");
   }
