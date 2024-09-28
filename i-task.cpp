@@ -2,28 +2,27 @@
 #include <iostream>
 #include <vector>
 
-class DynamicArray
-{
+class DynamicArray {
  private:
-  int   n_    = 0;
-  int   m_    = 0; 
+  int n_ = 0;
+  int m_ = 0;
   int** data_ = nullptr;
 
  public:
-  DynamicArray  (int n, int m);
-  ~DynamicArray ();
+  DynamicArray(int n, int m);
+  ~DynamicArray();
 
-  int* operator [](int i);
+  int* operator[](int i);
 
   void Clear();
 };
 
-DynamicArray::DynamicArray(int n, int m) : n_(n), m_(m), data_(nullptr)  {
+DynamicArray::DynamicArray(int n, int m) : n_(n), m_(m), data_(nullptr) {
   data_ = new int*[n_];
 
   for (int i = 0; i < n_; ++i) {
     data_[i] = new int[m_];
-  }  
+  }
 
   Clear();
 }
@@ -36,9 +35,7 @@ DynamicArray::~DynamicArray() {
   delete[] data_;
 }
 
-int* DynamicArray::operator[](int i) {
-  return data_[i];
-}
+int* DynamicArray::operator[](int i) { return data_[i]; }
 
 void DynamicArray::Clear() {
   for (int i = 0; i < n_; ++i) {
@@ -53,14 +50,14 @@ bool Compare(int sign, int elem1, int elem2) {
 }
 
 void FindLargestAlternatingSequence(const std::vector<int>& src_seq,
-                                          std::vector<int>& res_seq) {
-  int n     = src_seq.size();
-  int low   = 0;
+                                    std::vector<int>& res_seq) {
+  int n = src_seq.size();
+  int low = 0;
   int great = 1;
 
   DynamicArray dp(n, 2);
 
-  dp[0][low]   = 1;
+  dp[0][low] = 1;
   dp[0][great] = 1;
 
   for (int i = 1; i < n; ++i) {
@@ -73,25 +70,25 @@ void FindLargestAlternatingSequence(const std::vector<int>& src_seq,
     }
   }
 
-  int max_len  = 0;
-  int pos      = 0;
-  int sign     = 0;
+  int max_len = 0;
+  int pos = 0;
+  int sign = 0;
 
   for (int i = 0; i < n; ++i) {
     if (dp[i][great] > max_len) {
-      max_len  = dp[i][great];
-      sign     = great;
-      pos      = i;
+      max_len = dp[i][great];
+      sign = great;
+      pos = i;
     }
     if (dp[i][low] > max_len) {
-      max_len  = dp[i][low];
-      sign     = low;
-      pos      = i;
+      max_len = dp[i][low];
+      sign = low;
+      pos = i;
     }
   }
 
   res_seq.push_back(src_seq[pos]);
-  
+
   int cur_elem = src_seq[pos];
 
   while (max_len > 1) {
