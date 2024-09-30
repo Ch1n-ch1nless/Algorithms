@@ -1,55 +1,66 @@
-#include <cassert>
+#include <cmath>
 #include <iostream>
 #include <vector>
 
-const int PREVIOUS = 0;
-const int CURRENT  = 1;
-
-int FindMinNumberOfExperiments(const int &max_height, const int &planes_number);
+int FindMinNumberOfExperiments(const std::size_t& max_height, const std::size_t& number_of_planes);
 
 int main()
 {
-    int max_height          = 0;
-    int number_of_planes    = 0;
+    std::size_t max_height       = 0;
+    std::size_t number_of_planes = 0;
 
     std::cin >> max_height >> number_of_planes;
 
-    int answer = (max_height <= 2) ? std::max(0, max_height - 1) : FindMinNumberOfExperiments(max_height, number_of_planes);
+    int answer = FindMinNumberOfExperiments(max_height, number_of_planes);
 
     std::cout << answer << '\n';
 
     return 0;
 }
 
-int FindMinNumberOfExperiments(const int &max_height, const int &planes_number)
+int CheckWithoutDp(const std::size_t& k, const std::size_t& n)
 {
-    std::vector<std::vector<int>> dp(2, std::vector<int>(planes_number + 1, 1));
-
-    for (int i = 1; i <= planes_number; ++i)
+    std::size_t value = 1;
+    
+    for (std::size_t pow = 0; pow <= k; ++pow)
     {
-        dp[PREVIOUS][i] = 2;
-    }
-
-    for (int i = 2; i <= max_height; ++i)
-    {
-        dp[CURRENT][0] = 1;
-        dp[CURRENT][1] = i+1;
-
-        for (int j = 2; j <= planes_number; ++j)
+        if (value >=  n)
         {
-            dp[CURRENT][j] = dp[PREVIOUS][j-1] + dp[PREVIOUS][j];
+            return pow;
         }
 
-        if (dp[CURRENT][planes_number] >= max_height)
-        {
-            return i;
-        }
-
-        for (int i = 0; i < planes_number; ++i)
-        {
-            dp[PREVIOUS][i] = dp[CURRENT][i];
-        }
+        value *= 2;
     }
 
     return -1;
+}
+
+int FindMinNumberOfExperiments(const std::size_t& max_height, const std::size_t& number_of_planes)
+{
+    if (number_of_planes == 0)
+    {
+        return (max_height == 1) ? 0 : -1;
+    }
+
+    int answer = CheckWithoutDp(number_of_planes, max_height);
+
+    if (answer == -1)
+    {
+        std::vector<std::vector<int>> dp(max_height+1, std::vector(number_of_planes + 1, 1));
+
+        for (std::size_t try_num = 1; try_num <= max_height; ++try_num)
+        {
+            for (std::size_t plane_index = 1; plane_index <= number_of_planes; ++plane_index)
+            {
+                dp[try_num][plane_index] = dp[try_num-1][plane_index-1] + dp[try_num-1][plane_index];
+            }
+
+            if (dp[try_num][number_of_planes] >= max_height)
+            {
+                return try_num;
+            }
+        }
+    }   
+
+    return answer;
 }
