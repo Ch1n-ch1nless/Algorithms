@@ -1,30 +1,20 @@
 #include <cassert>
 #include <cmath>
-#include <cstdio>
+#include <iostream>
+#include <vector>
 
 const unsigned long long MODULE = 1000003;
 
-class Vector {
- public:
-  unsigned long long data[5];
+void CalculateFirstStepsOfGrassHopper(std::vector<unsigned long long> &grasshopper_steps)
+{
+  if (grasshopper_steps.size() == 0) return;
 
-  Vector() : data() {
-    for (int i = 0; i < 5; ++i) {
-      data[i] = 0;
-    }
-  }
+  grasshopper_steps[0] = 1;
 
-  ~Vector() = default;
-
-  void CalculateFirstSteps();
-};
-
-void Vector::CalculateFirstSteps() {
-  data[0] = 1;
-
-  for (int step = 1; step < 5; ++step) {
-    for (int i = 1; i <= step; ++i) {
-      data[step] += data[step - i];
+  for (std::size_t i = 1; i < grasshopper_steps.size(); ++i) {
+    grasshopper_steps[i] = 0;
+    for (std::size_t j = 0; j < i; ++j) {
+      grasshopper_steps[i] += grasshopper_steps[j];
     }
   }
 }
@@ -39,14 +29,23 @@ class Matrix {
 
   ~Matrix() = default;
 
+  std::size_t Size() { return n; }
+
   void CreateMoveMatrix();
 
   friend Matrix operator*(const Matrix& left, const Matrix& right);
-  friend Vector operator*(const Matrix& matrix, std::vector<unsigned long long>& vector);
+
+  friend std::vector<unsigned long long> operator*(const Matrix& matrix, const std::vector<unsigned long long>& vector);
 };
 
 void Matrix::CreateMoveMatrix() {
-  
+  for (std::size_t i = 0; i < n - 1; ++i) {
+    data[i][i+1] = 1;
+  }
+
+  for (std::size_t i = 0; i < n; ++i) {
+    data[n-1][i] = 1;
+  }
 }
 
 Matrix operator*(const Matrix& left, const Matrix& right) {
@@ -64,15 +63,15 @@ Matrix operator*(const Matrix& left, const Matrix& right) {
   return result;
 }
 
-Vector operator*(const Matrix& matrix, const Vector& vector) {
-  std::vector<unsigned long long> 
+std::vector<unsigned long long> operator*(const Matrix& matrix, const std::vector<unsigned long long>& vector) {
+  std::vector<unsigned long long> result(vector.size());
 
   for (int i = 0; i < 5; ++i) {
-    result.data[i] = 0;
+    result[i] = 0;
 
     for (int j = 0; j < 5; ++j) {
-      result.data[i] += (vector.data[j] * matrix.data[i][j]) % MODULE;
-      result.data[i] %= MODULE;
+      result[i] += (vector[j] * matrix.data[i][j]) % MODULE;
+      result[i] %= MODULE;
     }
   }
 
@@ -96,27 +95,25 @@ int main() {
   unsigned long long number_of_moves = 0;
   unsigned long long answer = 0;
 
-  if (!scanf("%llu", &number_of_moves)) {
-    assert(false && "ERROR!!! Program can not read the number!\n");
-  }
+  std::cin >> number_of_moves;
 
-  Vector grasshopper_moves = {};
-  grasshopper_moves.CalculateFirstSteps();
+  std::vector<unsigned long long> grasshopper_moves(5);
+  CalculateFirstStepsOfGrassHopper(grasshopper_moves);
 
   if (number_of_moves <= 5) {
-    answer = grasshopper_moves.data[--number_of_moves];
+    answer = grasshopper_moves[--number_of_moves];
   } else {
-    Matrix move_matrix = {};
+    Matrix move_matrix(5);
     move_matrix.CreateMoveMatrix();
 
     move_matrix = BinPow(move_matrix, number_of_moves - 5);
 
     grasshopper_moves = move_matrix * grasshopper_moves;
 
-    answer = grasshopper_moves.data[4];
+    answer = grasshopper_moves[4];
   }
 
-  printf("%llu\n", answer);
+  std::cout << answer << '\n';
 
   return 0;
 }
