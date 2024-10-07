@@ -31,55 +31,31 @@ void Vector::CalculateFirstSteps() {
 
 class Matrix {
  private:
-  unsigned long long data[5][5];
+  std::size_t                                  n;
+  std::vector<std::vector<unsigned long long>> data;
 
  public:
-  Matrix(unsigned long long new_data[5][5]) : data() {
-    for (int i = 0; i < 5; ++i) {
-      for (int j = 0; j < 5; ++j) {
-        data[i][j] = new_data[i][j];
-      }
-    }
-  }
-
-  Matrix() : data() {
-    for (int i = 0; i < 5; ++i) {
-      for (int j = 0; j < 5; ++j) {
-        data[i][j] = 0;
-      }
-    }
-  }
+  Matrix(std::size_t n) : n(n), data(n, std::vector<unsigned long long>(n, 0)) {}
 
   ~Matrix() = default;
 
   void CreateMoveMatrix();
 
   friend Matrix operator*(const Matrix& left, const Matrix& right);
-  friend Vector operator*(const Matrix& matrix, const Vector& vector);
+  friend Vector operator*(const Matrix& matrix, std::vector<unsigned long long>& vector);
 };
 
 void Matrix::CreateMoveMatrix() {
-  data[0][1] = 1;
-  data[1][2] = 1;
-  data[2][3] = 1;
-  data[3][4] = 1;
-  data[4][0] = 1;
-  data[4][1] = 1;
-  data[4][2] = 1;
-  data[4][3] = 1;
-  data[4][4] = 1;
+  
 }
 
 Matrix operator*(const Matrix& left, const Matrix& right) {
-  Matrix result = {};
+  Matrix result(left.n);
 
-  for (int left_index = 0; left_index < 5; ++left_index) {
-    for (int right_index = 0; right_index < 5; ++right_index) {
-      result.data[left_index][right_index] = 0;
-
-      for (int i = 0; i < 5; ++i) {
-        result.data[left_index][right_index] +=
-            (left.data[left_index][i] * right.data[i][right_index]) % MODULE;
+  for (int left_index = 0; left_index < result.n; ++left_index) {
+    for (int right_index = 0; right_index < result.n; ++right_index) {
+      for (int i = 0; i < result.n; ++i) {
+        result.data[left_index][right_index] += (left.data[left_index][i] * right.data[i][right_index]) % MODULE;
         result.data[left_index][right_index] %= MODULE;
       }
     }
@@ -89,7 +65,7 @@ Matrix operator*(const Matrix& left, const Matrix& right) {
 }
 
 Vector operator*(const Matrix& matrix, const Vector& vector) {
-  Vector result = {};
+  std::vector<unsigned long long> 
 
   for (int i = 0; i < 5; ++i) {
     result.data[i] = 0;
