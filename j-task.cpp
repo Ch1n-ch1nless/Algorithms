@@ -3,53 +3,50 @@
 #include <string>
 #include <vector>
 
-int FindLargestCommonSequence(std::string& cj_dance, std::string& caesar_dance,
-                              std::vector<int>& cj_index,
-                              std::vector<int>& caesar_index) {
-  int cj_len = cj_dance.size();
-  int caesar_len = caesar_dance.size();
+struct LargestCommonSequence {
+  size_t              number_of_elements  = 0;
+  std::vector<size_t> indexes1            = {};
+  std::vector<size_t> indexes2            = {};
+};
 
-  int answer = 0;
+LargestCommonSequence 
+FindLargestCommonSequence(std::string& string1, std::string& string2) {
+  
+  LargestCommonSequence answer = {};
 
   int i_begin = 0;
   int j_begin = 0;
 
-  int dp[1001][1001] = {};
+  std::vector<std::vector<size_t>> lcs_dp(string1.size() + 1, std::vector<size_t>(string2.size() + 1, 0));
 
-  for (int i = 0; i <= cj_len; ++i) {
-    for (int j = 0; j <= caesar_len; ++j) {
-      dp[i][j] = 0;
-    }
-  }
+  for (int i = 1; i <= string1.size(); ++i) {
+    for (int j = 1; j <= string2.size(); ++j) {
+      lcs_dp[i][j] = std::max(lcs_dp[i - 1][j], lcs_dp[i][j - 1]);
 
-  for (int i = 1; i <= cj_len; ++i) {
-    for (int j = 1; j <= caesar_len; ++j) {
-      dp[i][j] = std::max(dp[i - 1][j], dp[i][j - 1]);
-
-      if (cj_dance[i - 1] == caesar_dance[j - 1]) {
-        dp[i][j] = dp[i - 1][j - 1] + 1;
+      if (string1[i - 1] == string2[j - 1]) {
+        lcs_dp[i][j] = lcs_dp[i - 1][j - 1] + 1;
       }
 
-      if (dp[i][j] > answer) {
-        answer = dp[i][j];
+      if (lcs_dp[i][j] > answer.number_of_elements) {
+        answer.number_of_elements = lcs_dp[i][j];
         i_begin = i;
         j_begin = j;
       }
     }
   }
 
-  int count = answer;
+  int count = answer.number_of_elements;
 
   while (count != 0) {
-    if (cj_dance[i_begin - 1] == caesar_dance[j_begin - 1]) {
-      cj_index.push_back(i_begin);
-      caesar_index.push_back(j_begin);
+    if (string1[i_begin - 1] == string2[j_begin - 1]) {
+      answer.indexes1.push_back(i_begin);
+      answer.indexes2.push_back(j_begin);
 
       i_begin--;
       j_begin--;
       count--;
     } else {
-      if (dp[i_begin - 1][j_begin] < dp[i_begin][j_begin - 1]) {
+      if (lcs_dp[i_begin - 1][j_begin] < lcs_dp[i_begin][j_begin - 1]) {
         j_begin--;
       } else {
         i_begin--;
@@ -57,10 +54,27 @@ int FindLargestCommonSequence(std::string& cj_dance, std::string& caesar_dance,
     }
   }
 
-  std::reverse(cj_index.begin(), cj_index.end());
-  std::reverse(caesar_index.begin(), caesar_index.end());
+  std::reverse(answer.indexes1.begin(), answer.indexes1.end());
+  std::reverse(answer.indexes2.begin(), answer.indexes2.end());
 
   return answer;
+}
+
+void PrintLargestCommonSequence(LargestCommonSequence& lcs)
+{
+  std::cout << lcs.number_of_elements << '\n';
+
+  for (size_t i = 0; i < lcs.indexes1.size(); ++i)
+  {
+    std::cout << lcs.indexes1[i] << ' ';
+  }
+  std::cout << '\n';
+
+  for (size_t i = 0; i < lcs.indexes2.size(); ++i)
+  {
+    std::cout << lcs.indexes2[i] << ' ';
+  }
+  std::cout << '\n';
 }
 
 int main() {
@@ -70,23 +84,10 @@ int main() {
   std::cin >> cj_dance;
   std::cin >> caesar_dance;
 
-  std::vector<int> cj_index = {};
-  std::vector<int> caesar_index = {};
+  LargestCommonSequence answer =
+      FindLargestCommonSequence(cj_dance, caesar_dance);
 
-  int answer =
-      FindLargestCommonSequence(cj_dance, caesar_dance, cj_index, caesar_index);
-
-  std::cout << answer << '\n';
-
-  for (int& index : cj_index) {
-    std::cout << index << ' ';
-  }
-  std::cout << '\n';
-
-  for (int& index : caesar_index) {
-    std::cout << index << ' ';
-  }
-  std::cout << '\n';
+  PrintLargestCommonSequence(answer);
 
   return 0;
 }
