@@ -3,7 +3,8 @@
 #include <iostream>
 #include <vector>
 
-const unsigned long long MODULE = 1000003;
+const unsigned long long MODULE       = 1000003;
+const unsigned long long MAX_JUMP_LEN = 5;
 
 void CalculateFirstStepsOfGrassHopper(std::vector<unsigned long long> &grasshopper_steps)
 {
@@ -91,27 +92,33 @@ Matrix BinPow(const Matrix& src, unsigned long long pow) {
   return result;
 }
 
-int main() {
-  unsigned long long number_of_moves = 0;
-  unsigned long long answer = 0;
-
-  std::cin >> number_of_moves;
-
-  std::vector<unsigned long long> grasshopper_moves(5);
+unsigned long long CalculateNumberOfSteps(std::vector<unsigned long long>& grasshopper_moves, unsigned long long& number_of_moves) {
+  unsigned long long max_jump_len = grasshopper_moves.size();
+  
   CalculateFirstStepsOfGrassHopper(grasshopper_moves);
 
-  if (number_of_moves <= 5) {
-    answer = grasshopper_moves[--number_of_moves];
+  if (number_of_moves <= max_jump_len) {
+    return grasshopper_moves[--number_of_moves];
   } else {
-    Matrix move_matrix(5);
+    Matrix move_matrix(max_jump_len);
     move_matrix.CreateMoveMatrix();
 
-    move_matrix = BinPow(move_matrix, number_of_moves - 5);
+    move_matrix = BinPow(move_matrix, number_of_moves - max_jump_len);
 
     grasshopper_moves = move_matrix * grasshopper_moves;
 
-    answer = grasshopper_moves[4];
+    return grasshopper_moves[max_jump_len-1];
   }
+}
+
+int main() {
+  unsigned long long number_of_moves = 0;
+
+  std::cin >> number_of_moves;
+
+  std::vector<unsigned long long> grasshopper_moves(MAX_JUMP_LEN);
+  
+  unsigned long long answer = CalculateNumberOfSteps(grasshopper_moves, number_of_moves);
 
   std::cout << answer << '\n';
 
