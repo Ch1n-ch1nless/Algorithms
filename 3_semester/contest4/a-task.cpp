@@ -56,6 +56,9 @@ int DisjointSetUnion::uniteSets(int set1, int set2)
 
 int main()
 {
+    std::cin.tie(NULL);
+    std::ios_base::sync_with_stdio(false);
+
     int tables_number   = 0;
     int request_number  = 0;
 
