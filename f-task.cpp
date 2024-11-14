@@ -85,6 +85,20 @@ CondensedGraph::CondensedGraph(const Graph& src_graph) {
   temp_new_graph_.setVertexNumber(src_graph.getVertexNumber());
   findAllBridges(src_graph);
   condensateGraph();
+
+  /*std::cout << "Vertex    := { ";
+  for (int i = 0; i < components_.size(); i++)
+  {
+    std::cout << i << ", ";
+  }
+  std::cout << "}\n";
+
+  std::cout << "Component := { ";
+  for (int i = 0; i < components_.size(); i++)
+  {
+    std::cout << components_[i] << ", ";
+  }
+  std::cout << "}\n";*/
 }
 
 Graph& CondensedGraph::getTree() { return tree_; }
@@ -125,7 +139,7 @@ void CondensedGraph::findBridge(const Graph& src_graph, int v, int p) {
       findBridge(src_graph, to, v);
       ret[v] = std::min(ret[v], ret[to]);
 
-      if (ret[to] >= tin[v]) {
+      if (ret[to] > tin[v]) {
         bridges.push_back({v, to});
       } else {
         temp_new_graph_[v].push_back(to);
@@ -250,6 +264,18 @@ Solution::Solution(const Graph& graph, int start_vertex)
   fillDFSList(condensed_graph_.getTree(),
               condensed_graph_.getComponentId(start_vertex));
 
+  /*for (auto vertex : dfs_list_)
+  {
+    std::cout << vertex << ' ';
+  }
+  std::cout << '\n';
+
+  for (auto h : depth_)
+  {
+    std::cout << h << ' ';
+  }
+  std::cout << '\n';*/
+
   rmq_.init(depth_);
 }
 
@@ -299,6 +325,7 @@ int main() {
   int final_vertex = 0;
 
   std::cin >> vertex_number >> edge_number >> final_vertex;
+  final_vertex--;
 
   Graph src_graph(vertex_number);
 
