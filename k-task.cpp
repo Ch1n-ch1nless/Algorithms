@@ -2,31 +2,28 @@
 #include <limits>
 #include <vector>
 
-static const long long INF =
-    static_cast<long long>(std::numeric_limits<int>::max());
-static const long long COEFFICIENT_K = -2;
-static const long long COEFFICIENT_B = 1;
+static const int64_t INF = 2147483647;
 
 class Line {
  public:
   Line() {}
-  Line(const long long& k, const long long& b) {
+  Line(const int64_t& k, const int64_t& b) {
     k_ = k;
     b_ = b;
   }
 
-  long long GetY(const long long& x) { return k_ * x + b_; }
+  int64_t GetY(const int64_t& x) const { return k_ * x + b_; }
 
-  long long GetK() { return k_; }
-  long long GetB() { return b_; }
+  int64_t GetK() const { return k_; }
+  int64_t GetB() const { return b_; }
 
  private:
-  long long k_;
-  long long b_;
+  int64_t k_;
+  int64_t b_;
 };
 
-long long CrossLines(Line& line1, Line& line2) {
-  long long x = (line2.GetB() - line1.GetB()) / (line1.GetK() - line2.GetK());
+int64_t CrossLines(const Line& line1, const Line& line2) {
+  int64_t x = (line2.GetB() - line1.GetB()) / (line1.GetK() - line2.GetK());
 
   if (line2.GetB() < line1.GetB()) x--;
 
@@ -39,10 +36,10 @@ class ConvexHullTrick {
   ~ConvexHullTrick() = default;
 
   void AddLine(Line new_line);
-  long long GetMin(const long long& x);
+  int64_t GetMin(const int64_t& x);
 
  private:
-  std::vector<long long> points_;
+  std::vector<int64_t> points_;
   std::vector<Line> lines_;
 };
 
@@ -61,50 +58,67 @@ void ConvexHullTrick::AddLine(Line new_line) {
   lines_.push_back(new_line);
 }
 
-long long ConvexHullTrick::GetMin(const long long& x) {
-  long long line_index =
+int64_t ConvexHullTrick::GetMin(const int64_t& x) {
+  int64_t line_index =
       std::lower_bound(points_.begin(), points_.end(), x) - points_.begin() - 1;
 
   return lines_[line_index].GetY(x);
 }
 
-long long FindMinSumSquareLens(const long long& max_points_number,
-                               const long long& max_segment_number) {
-  std::vector<std::vector<long long>> sum_lens_dp(
-      max_segment_number + 1,
-      std::vector<long long>(max_points_number + 1, INF));
+class MinSumSquaredLensCalculator {
+ public:
+  int64_t operator()(const size_t& max_points_number,
+                     const size_t& max_segment_number);
 
-  for (long long seg_count = 0; seg_count <= max_segment_number; ++seg_count) {
-    sum_lens_dp[seg_count][0] = 0ll;
+ private:
+  std::vector<std::vector<int64_t>> min_sum_of_squared_lens;
+
+  const int64_t COEFFICIENT_K = -2;
+  const int64_t COEFFICIENT_B = 1;
+};
+
+int64_t MinSumSquaredLensCalculator::operator()(
+    const size_t& max_points_number, const size_t& max_segment_number) {
+
+  min_sum_of_squared_lens.assign(
+      max_segment_number + 1, std::vector<int64_t>(max_points_number + 1, INF));
+
+  for (size_t seg_count = 0; seg_count <= max_segment_number; ++seg_count) {
+    min_sum_of_squared_lens[seg_count][0] = 0ll;
   }
 
-  for (long long seg_count = 1; seg_count <= max_segment_number; ++seg_count) {
+  for (size_t seg_count = 1; seg_count <= max_segment_number; ++seg_count) {
     ConvexHullTrick trick;
-    for (long long point_count = 1; point_count <= max_points_number;
+    for (size_t point_count = 1; point_count <= max_points_number;
          ++point_count) {
       trick.AddLine(
           Line(COEFFICIENT_K * point_count,
-               COEFFICIENT_B * (sum_lens_dp[seg_count - 1][point_count - 1] +
-                                (point_count) * (point_count))));
-      sum_lens_dp[seg_count][point_count] =
+               COEFFICIENT_B *
+                   (min_sum_of_squared_lens[seg_count - 1][point_count - 1] +
+                    (point_count) * (point_count))));
+
+      min_sum_of_squared_lens[seg_count][point_count] =
           trick.GetMin(point_count) + point_count * point_count;
     }
   }
 
-  if (sum_lens_dp[max_segment_number][max_points_number] < INF) {
-    return sum_lens_dp[max_segment_number][max_points_number];
+  if (min_sum_of_squared_lens[max_segment_number][max_points_number] < INF) {
+    return min_sum_of_squared_lens[max_segment_number][max_points_number];
   }
 
   return 0;
 }
 
 int main() {
-  long long segment_number = 0;
-  long long points_number = 0;
+  size_t points_number = 0;
+  size_t segment_number = 0;
 
   std::cin >> points_number >> segment_number;
 
-  long long answer = FindMinSumSquareLens(points_number, segment_number);
+  MinSumSquaredLensCalculator min_sum_of_squared_lens_of_segments;
+
+  int64_t answer =
+      min_sum_of_squared_lens_of_segments(points_number, segment_number);
 
   std::cout << answer << '\n';
 
