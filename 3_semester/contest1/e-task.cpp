@@ -123,4 +123,5 @@ int BinarySearch(std::vector<int> &coords, int pivot)
     auto mid_ptr = std::lower_bound(coords.begin(), coords.end(), pivot);
     int  mid_pos = static_cast<int>(std::distance(coords.begin(), mid_ptr)); 
     return mid_pos;
+
 }
