@@ -48,8 +48,6 @@ struct Edge {
   int cost;
 };
 
-bool cmp(Edge& edge1, Edge& edge2) { return edge1.cost > edge2.cost; }
-
 class Graph {
  public:
   Graph(int vertex_number);
@@ -113,7 +111,7 @@ void MinimalSpanningTree::build(const Graph& src, Graph& tree) {
     }
   }
 
-  std::sort(edge_list.begin(), edge_list.end(), cmp);
+  std::sort(edge_list.begin(), edge_list.end(), [](Edge& edge1, Edge& edge2){return edge1.cost > edge2.cost;});
 
   DisjointSetUnion dsu(src.getVertexNumber());
 
