@@ -48,6 +48,12 @@ struct Edge {
   int cost;
 };
 
+std::istream& operator>>(std::istream& in, Edge& edge)
+{
+  in >> edge.begin >> edge.end >> edge.cost;
+  return in;
+}
+
 class Graph {
  public:
   Graph(int vertex_number);
@@ -153,6 +159,17 @@ int FindMaxCost(const Graph& graph, int begin, int end) {
   return dist[end];
 }
 
+void ReadGraph(Graph& graph, int edge_number) {
+  for (int i = 0; i < edge_number; i++)
+  {
+    Edge new_edge = {};
+    std::cin >> new_edge;
+
+    graph.addEdge(new_edge);
+    graph.addEdge(Edge{new_edge.end, new_edge.begin, new_edge.cost});
+  }
+}
+
 int main() {
   std::cin.tie(NULL);
   std::ios_base::sync_with_stdio(false);
@@ -164,19 +181,7 @@ int main() {
 
   Graph src_graph(vertex_number + 1);
 
-  for (int i = 0; i < edge_number; i++) {
-    Edge edge1 = {};
-    Edge edge2 = {};
-
-    std::cin >> edge1.begin >> edge1.end >> edge1.cost;
-
-    edge2.begin = edge1.end;
-    edge2.end = edge1.begin;
-    edge2.cost = edge1.cost;
-
-    src_graph.addEdge(edge1);
-    src_graph.addEdge(edge2);
-  }
+  ReadGraph(src_graph, edge_number);
 
   MinimalSpanningTree mst(src_graph);
 
