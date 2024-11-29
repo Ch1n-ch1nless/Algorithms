@@ -56,6 +56,7 @@ std::istream& operator>>(std::istream& in, Edge& edge)
 
 class Graph {
  public:
+  Graph();
   Graph(int vertex_number);
   ~Graph() = default;
 
@@ -64,11 +65,14 @@ class Graph {
   std::vector<Edge>& operator[](int vertex);
   const std::vector<Edge>& operator[](int vertex) const;
 
-  int getVertexNumber() const;
+  void setVertexNumber(int new_vertex_number);
+  int  getVertexNumber() const;
 
  private:
   std::vector<std::vector<Edge>> adjacency_list_;
 };
+
+Graph::Graph() : adjacency_list_() {}
 
 Graph::Graph(int vertex_number) : adjacency_list_(vertex_number) {}
 
@@ -88,27 +92,28 @@ int Graph::getVertexNumber() const {
   return static_cast<int>(adjacency_list_.size());
 }
 
+void Graph::setVertexNumber(int new_vertex_number) {
+  adjacency_list_.resize(new_vertex_number);
+}
+
 class MinimalSpanningTree {
  public:
-  MinimalSpanningTree(const Graph& src);
+  MinimalSpanningTree();
 
   ~MinimalSpanningTree() = default;
 
   Graph& getGraph();
   const Graph& getGraph() const;
 
+  void build(const Graph& src);
+
  private:
   Graph tree_;
-
-  void build(const Graph& src, Graph& mst);
 };
 
-MinimalSpanningTree::MinimalSpanningTree(const Graph& src)
-    : tree_(src.getVertexNumber()) {
-  build(src, tree_);
-}
+MinimalSpanningTree::MinimalSpanningTree() : tree_() {}
 
-void MinimalSpanningTree::build(const Graph& src, Graph& tree) {
+void MinimalSpanningTree::build(const Graph& src) {
   std::vector<Edge> edge_list = {};
 
   for (int i = 0; i < src.getVertexNumber(); ++i) {
@@ -116,6 +121,8 @@ void MinimalSpanningTree::build(const Graph& src, Graph& tree) {
       edge_list.push_back(new_edge);
     }
   }
+
+  tree_.setVertexNumber(src.getVertexNumber());
 
   std::sort(edge_list.begin(), edge_list.end(), [](Edge& edge1, Edge& edge2){return edge1.cost > edge2.cost;});
 
@@ -126,8 +133,8 @@ void MinimalSpanningTree::build(const Graph& src, Graph& tree) {
     int end = edge_list[i].end;
 
     if (dsu.getParent(begin) != dsu.getParent(end)) {
-      tree[begin].push_back(edge_list[i]);
-      tree[end].push_back(
+      tree_[begin].push_back(edge_list[i]);
+      tree_[end].push_back(
           Edge{edge_list[i].end, edge_list[i].begin, edge_list[i].cost});
       dsu.uniteSets(begin, end);
     }
@@ -183,7 +190,9 @@ int main() {
 
   ReadGraph(src_graph, edge_number);
 
-  MinimalSpanningTree mst(src_graph);
+  MinimalSpanningTree mst;
+
+  mst.build(src_graph);
 
   for (int i = 0; i < request_number; i++) {
     int vertex1 = 0;
