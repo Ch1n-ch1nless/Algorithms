@@ -48,8 +48,7 @@ struct Edge {
   int cost;
 };
 
-std::istream& operator>>(std::istream& in, Edge& edge)
-{
+std::istream& operator>>(std::istream& in, Edge& edge) {
   in >> edge.begin >> edge.end >> edge.cost;
   return in;
 }
@@ -66,7 +65,7 @@ class Graph {
   const std::vector<Edge>& operator[](int vertex) const;
 
   void setVertexNumber(int new_vertex_number);
-  int  getVertexNumber() const;
+  int getVertexNumber() const;
 
  private:
   std::vector<std::vector<Edge>> adjacency_list_;
@@ -124,7 +123,8 @@ void MinimalSpanningTree::build(const Graph& src) {
 
   tree_.setVertexNumber(src.getVertexNumber());
 
-  std::sort(edge_list.begin(), edge_list.end(), [](Edge& edge1, Edge& edge2){return edge1.cost > edge2.cost;});
+  std::sort(edge_list.begin(), edge_list.end(),
+            [](Edge& edge1, Edge& edge2) { return edge1.cost > edge2.cost; });
 
   DisjointSetUnion dsu(src.getVertexNumber());
 
@@ -167,8 +167,7 @@ int FindMaxCost(const Graph& graph, int begin, int end) {
 }
 
 void ReadGraph(Graph& graph, int edge_number) {
-  for (int i = 0; i < edge_number; i++)
-  {
+  for (int i = 0; i < edge_number; i++) {
     Edge new_edge = {};
     std::cin >> new_edge;
 
