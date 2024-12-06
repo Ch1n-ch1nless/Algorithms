@@ -4,7 +4,7 @@
 
 using Graph = std::vector<std::vector<int>>;
 
-Graph findTransitiveClosureMatrixOfSrcGraph(Graph& src_graph) {
+Graph findTransitiveClosureMatrixOfSrcGraph(const Graph& src_graph) {
   size_t vertex_number = src_graph.size();
 
   Graph trans_closure_graph = src_graph;
@@ -39,7 +39,7 @@ std::istream& operator>>(std::istream& in, Graph& graph) {
   return in;
 }
 
-std::ostream& operator<<(std::ostream& out, Graph& graph) {
+std::ostream& operator<<(std::ostream& out, const Graph& graph) {
   for (size_t i = 0; i < graph.size(); ++i) {
     for (size_t j = 0; j < graph[i].size(); ++j) {
       out << graph[i][j] << ' ';
