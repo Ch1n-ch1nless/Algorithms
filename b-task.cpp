@@ -4,6 +4,8 @@
 #include <queue>
 #include <vector>
 
+using Vertex = int;
+
 struct Edge {
   int to;
   long long cost;
@@ -14,13 +16,61 @@ bool std::greater<Edge>::operator()(const Edge& lhs, const Edge& rhs) const {
   return lhs.cost > rhs.cost;
 }
 
-using Graph = std::vector<std::vector<Edge>>;
+class Graph {
+ public:
+  Graph() = default;
+  Graph(size_t vertex_number);
+  Graph(const Graph& other);
+
+  Graph& operator=(const Graph& other);
+
+  std::vector<Edge>& operator[](const Vertex& vertex);
+  const std::vector<Edge>& operator[](const Vertex& vertex) const;
+
+  size_t getVertexNum() const;
+  void setVertexNum(size_t new_vertex_num);
+
+  void addEdge(const Vertex& start, const Vertex& finish, long long cost);
+
+ private:
+  std::vector<std::vector<Edge>> adjacency_list_;
+};
+
+Graph::Graph(size_t vertex_number) : adjacency_list_(vertex_number) {}
+
+Graph::Graph(const Graph& other) : adjacency_list_(other.adjacency_list_) {}
+
+Graph& Graph::operator=(const Graph& other) {
+  if (this != &other) {
+    adjacency_list_ = other.adjacency_list_;
+  }
+  return *this;
+}
+
+std::vector<Edge>& Graph::operator[](const Vertex& vertex) {
+  return adjacency_list_[vertex];
+}
+
+const std::vector<Edge>& Graph::operator[](const Vertex& vertex) const {
+  return adjacency_list_[vertex];
+}
+
+size_t Graph::getVertexNum() const { return adjacency_list_.size(); }
+
+void Graph::setVertexNum(size_t new_vertex_num) {
+  adjacency_list_.resize(new_vertex_num);
+}
+
+void Graph::addEdge(const Vertex& start, const Vertex& finish, long long cost) {
+  adjacency_list_[start].push_back(Edge{finish, cost});
+  adjacency_list_[finish].push_back(Edge{start, cost});
+}
 
 const long long INF = __LONG_LONG_MAX__;
 
 std::vector<long long> findShortestPathDijkstra(const Graph& graph,
                                                 int start_vertex) {
-  size_t vertex_number = graph.size();
+  size_t vertex_number = graph.getVertexNum();
 
   std::vector<long long> distance(vertex_number, INF);
 
@@ -87,8 +137,7 @@ int main() {
 
     std::cin >> start_vertex >> finish_vertex >> cost;
 
-    graph[start_vertex].push_back(Edge{finish_vertex, cost});
-    graph[finish_vertex].push_back(Edge{start_vertex, cost});
+    graph.addEdge(start_vertex, finish_vertex, cost);
   }
 
   int start_vertex = 0;
