@@ -100,7 +100,7 @@ std::vector<long long> findShortestPathDijkstra(const Graph& graph,
   return distance;
 }
 
-long long findAnswer(const Graph& graph, int start_vertex, int finish_vertex,
+long long findMinTimeToMedicalRoom(const Graph& graph, int start_vertex, int finish_vertex,
                      const std::vector<int>& virus) {
   std::vector<long long> distance =
       findShortestPathDijkstra(graph, finish_vertex);
@@ -145,7 +145,7 @@ int main() {
 
   std::cin >> start_vertex >> finish_vertex;
 
-  std::cout << findAnswer(graph, start_vertex, finish_vertex, viruses) << '\n';
+  std::cout << findMinTimeToMedicalRoom(graph, start_vertex, finish_vertex, viruses) << '\n';
 
   return 0;
 }
