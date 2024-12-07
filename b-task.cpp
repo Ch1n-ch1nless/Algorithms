@@ -115,14 +115,9 @@ long long findMinTimeToMedicalRoom(const Graph& graph, int start_vertex, int fin
   return (ans >= virus_min_path) ? -1 : ans;
 }
 
-int main() {
-  size_t vertex_number = 0;
-  size_t edge_number = 0;
+std::vector<int> readVirusesPositions() {
   size_t virus_number = 0;
-
-  std::cin >> vertex_number >> edge_number >> virus_number;
-
-  Graph graph(vertex_number + 1);
+  std::cin >> virus_number;
 
   std::vector<int> viruses(virus_number);
 
@@ -130,6 +125,10 @@ int main() {
     std::cin >> viruses[i];
   }
 
+  return viruses;
+}
+
+void readGraph(Graph& graph, size_t edge_number) {
   for (size_t edge_id = 0; edge_id < edge_number; ++edge_id) {
     int start_vertex = 0;
     int finish_vertex = 0;
@@ -139,6 +138,19 @@ int main() {
 
     graph.addEdge(start_vertex, finish_vertex, cost);
   }
+}
+
+int main() {
+  size_t vertex_number = 0;
+  size_t edge_number = 0;
+
+  std::cin >> vertex_number >> edge_number;
+
+  Graph graph(vertex_number + 1);
+
+  std::vector<int> viruses = readVirusesPositions();
+
+  readGraph(graph, edge_number);
 
   int start_vertex = 0;
   int finish_vertex = 0;
