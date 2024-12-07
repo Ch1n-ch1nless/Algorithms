@@ -5,7 +5,7 @@
 using Vertex = int;
 
 class Graph {
-public:
+ public:
   Graph() = default;
   Graph(size_t vertex_number);
   Graph(const Graph& other);
@@ -18,26 +18,20 @@ public:
   const std::vector<bool>& operator[](const Vertex& vertex) const;
 
   size_t getVertexNum() const;
-  void   setVertexNum(size_t new_vertex_number);
+  void setVertexNum(size_t new_vertex_number);
 
   void addEdge(const Vertex& start, const Vertex& end);
   bool isEdgeExists(const Vertex& start, const Vertex& end) const;
 
-private:
+ private:
   std::vector<std::vector<bool>> adjacency_matrix_;
 };
 
-Graph::Graph(size_t vertex_number) 
-:
-  adjacency_matrix_(vertex_number, std::vector<bool>(vertex_number, false))
-{
-}
+Graph::Graph(size_t vertex_number)
+    : adjacency_matrix_(vertex_number,
+                        std::vector<bool>(vertex_number, false)) {}
 
-Graph::Graph(const Graph& other)
-:
-  adjacency_matrix_(other.adjacency_matrix_)
-{
-}
+Graph::Graph(const Graph& other) : adjacency_matrix_(other.adjacency_matrix_) {}
 
 Graph& Graph::operator=(const Graph& other) {
   if (this != &other) {
@@ -54,13 +48,12 @@ const std::vector<bool>& Graph::operator[](const Vertex& vertex) const {
   return adjacency_matrix_[vertex];
 }
 
-size_t Graph::getVertexNum() const {
-  return adjacency_matrix_.size();
-}
+size_t Graph::getVertexNum() const { return adjacency_matrix_.size(); }
 
 void Graph::setVertexNum(size_t new_vertex_number) {
   adjacency_matrix_.resize(new_vertex_number);
-  for (auto iter = adjacency_matrix_.begin(); iter != adjacency_matrix_.end(); ++iter) {
+  for (auto iter = adjacency_matrix_.begin(); iter != adjacency_matrix_.end();
+       ++iter) {
     iter->resize(new_vertex_number);
   }
 }
@@ -81,7 +74,8 @@ Graph findTransitiveClosureMatrixOfSrcGraph(const Graph& src_graph) {
   for (size_t k = 0; k < vertex_number; ++k) {
     for (size_t i = 0; i < vertex_number; ++i) {
       for (size_t j = 0; j < vertex_number; ++j) {
-        if (trans_closure_graph.isEdgeExists(i, k) && trans_closure_graph.isEdgeExists(k, j)) {
+        if (trans_closure_graph.isEdgeExists(i, k) &&
+            trans_closure_graph.isEdgeExists(k, j)) {
           trans_closure_graph.addEdge(i, j);
         }
       }
